@@ -1,4 +1,5 @@
 import React, {createContext, useContext, useState} from 'react';
+import moment from 'moment'; // 新增這行
 
 type DateRange = {start: string; end: string} | null;
 
@@ -18,7 +19,10 @@ type ContextType = {
 
 const defaultCondition: SearchCondition = {
   keyword: '',
-  dateRange: {start: '2025-05-15', end: '2025-05-16'},
+  dateRange: {
+    start: moment().format('YYYY-MM-DD'),
+    end: moment().add(1, 'day').format('YYYY-MM-DD'),
+  },
   animals: [],
 };
 

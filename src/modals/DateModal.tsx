@@ -3,7 +3,7 @@ import {View, Text, StyleSheet, TouchableOpacity} from 'react-native';
 import {SafeAreaView, useSafeAreaInsets} from 'react-native-safe-area-context';
 import {useModal} from '../context/ModalContext';
 import {useSearchCondition} from '../context/SearchConditionContext';
-import {DateRangePicker} from '../components/common/DateRangePicker';
+import {DateRangePickerComponent} from '../components/common/DateRangePicker';
 import Icon from '../components/PlatformIcon';
 
 const DateModal = () => {
@@ -32,7 +32,7 @@ const DateModal = () => {
       </View>
 
       <View style={styles.content}>
-        <DateRangePicker onRangeSelected={handleRangeSelected} />
+        <DateRangePickerComponent onRangeSelected={handleRangeSelected} />
       </View>
     </SafeAreaView>
   );

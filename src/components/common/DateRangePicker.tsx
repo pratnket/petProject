@@ -1,190 +1,180 @@
 import React, {useState} from 'react';
-import {Calendar, LocaleConfig} from 'react-native-calendars';
-import {View, StyleSheet, Text, TouchableOpacity} from 'react-native';
+import {View, Text, StyleSheet, FlatList, TouchableOpacity} from 'react-native';
+import moment from 'moment';
 
-LocaleConfig.locales['zh'] = {
-  monthNames: [
-    '一月',
-    '二月',
-    '三月',
-    '四月',
-    '五月',
-    '六月',
-    '七月',
-    '八月',
-    '九月',
-    '十月',
-    '十一月',
-    '十二月',
-  ],
-  monthNamesShort: [
-    '1月',
-    '2月',
-    '3月',
-    '4月',
-    '5月',
-    '6月',
-    '7月',
-    '8月',
-    '9月',
-    '10月',
-    '11月',
-    '12月',
-  ],
-  dayNames: [
-    '星期日',
-    '星期一',
-    '星期二',
-    '星期三',
-    '星期四',
-    '星期五',
-    '星期六',
-  ],
-  dayNamesShort: ['日', '一', '二', '三', '四', '五', '六'],
-  today: '今天',
-};
-LocaleConfig.defaultLocale = 'zh';
+import {useSearchCondition} from '../../context/SearchConditionContext';
+import {useModal} from '../../context/ModalContext';
 
-const formatDate = (date: Date) => {
-  return date.toISOString().split('T')[0];
-};
-
-export const DateRangePicker = ({
+export const DateRangePickerComponent = ({
   onRangeSelected,
 }: {
   onRangeSelected?: (start: string, end: string) => void;
 }) => {
-  const today = new Date();
-  const [startDate, setStartDate] = useState<string | null>(null);
-  const [endDate, setEndDate] = useState<string | null>(null);
-  const [currentDate, setCurrentDate] = useState<string>(formatDate(today));
+  const {closeModal} = useModal();
+  const {setDateRange} = useSearchCondition();
 
-  const onDayPress = (day: {dateString: string}) => {
-    const selected = day.dateString;
+  const today = moment();
+  const [startDate, setStartDate] = useState<moment.Moment | null>(null);
+  const [endDate, setEndDate] = useState<moment.Moment | null>(null);
+  const monthsToRender = 13;
+  const monthList = Array.from({length: monthsToRender}, (_, i) =>
+    moment().add(i, 'months'),
+  );
+
+  const isBetween = (date: moment.Moment) => {
+    if (!startDate || !endDate) return false;
+    return date.isAfter(startDate, 'day') && date.isBefore(endDate, 'day');
+  };
+
+  const handleSelectDate = (date: moment.Moment) => {
+    if (date.isBefore(today, 'day')) return; // 禁止選擇過去日期
 
     if (!startDate || (startDate && endDate)) {
-      setStartDate(selected);
+      setStartDate(date);
       setEndDate(null);
     } else if (startDate && !endDate) {
-      if (selected < startDate) {
+      if (date.isBefore(startDate)) {
         setEndDate(startDate);
-        setStartDate(selected);
-        onRangeSelected?.(selected, startDate);
+        setStartDate(date);
+        setDateRange({
+          start: date.format('YYYY-MM-DD'),
+          end: startDate.format('YYYY-MM-DD'),
+        });
+        onRangeSelected?.(
+          date.format('YYYY-MM-DD'),
+          startDate.format('YYYY-MM-DD'),
+        );
       } else {
-        setEndDate(selected);
-        onRangeSelected?.(startDate, selected);
+        setEndDate(date);
+        setDateRange({
+          start: startDate.format('YYYY-MM-DD'),
+          end: date.format('YYYY-MM-DD'),
+        });
+        onRangeSelected?.(
+          startDate.format('YYYY-MM-DD'),
+          date.format('YYYY-MM-DD'),
+        );
       }
+      closeModal();
     }
   };
 
-  const goToPreviousMonth = () => {
-    const date = new Date(currentDate);
-    date.setMonth(date.getMonth() - 1);
-    setCurrentDate(formatDate(date));
-  };
+  const renderMonth = (month: moment.Moment) => {
+    const startOfMonth = month.clone().startOf('month');
+    const endOfMonth = month.clone().endOf('month');
+    const days: moment.Moment[] = [];
+    const firstDayOfWeek = startOfMonth.day();
 
-  const goToNextMonth = () => {
-    const date = new Date(currentDate);
-    date.setMonth(date.getMonth() + 1);
-    setCurrentDate(formatDate(date));
-  };
+    for (let i = 0; i < firstDayOfWeek; i++) {
+      days.push(moment.invalid());
+    }
 
-  const displayYearMonth = () => {
-    const date = new Date(currentDate);
-    return `${date.getFullYear()}年${date.getMonth() + 1}月`;
+    for (let d = startOfMonth.date(); d <= endOfMonth.date(); d++) {
+      days.push(month.clone().date(d));
+    }
+
+    return (
+      <View key={month.format('YYYY-MM')} style={styles.monthContainer}>
+        <Text style={styles.monthLabel}>{month.format('YYYY年M月')}</Text>
+        <View style={styles.weekHeader}>
+          {[...Array(7)].map((_, i) => (
+            <Text key={i} style={styles.weekDay}>
+              {'日一二三四五六'[i]}
+            </Text>
+          ))}
+        </View>
+        <View style={styles.daysGrid}>
+          {days.map((day, idx) => {
+            const isValid = day.isValid?.();
+            const isSelected =
+              day.isSame(startDate, 'day') || day.isSame(endDate, 'day');
+            const isInRange = isBetween(day);
+            const isBeforeToday = !isValid || day.isBefore(today, 'day');
+            return (
+              <TouchableOpacity
+                key={idx}
+                disabled={isBeforeToday}
+                style={[
+                  styles.dayBox,
+                  isSelected && styles.selectedDay,
+                  isInRange && styles.inRangeDay,
+                ]}
+                onPress={() => handleSelectDate(day)}>
+                <Text
+                  style={[
+                    styles.dayText,
+                    isBeforeToday && styles.disabledDayText,
+                  ]}>
+                  {isValid ? day.date() : ''}
+                </Text>
+              </TouchableOpacity>
+            );
+          })}
+        </View>
+      </View>
+    );
   };
 
   return (
-    <View style={styles.container}>
-      <View style={styles.customHeader}>
-        <TouchableOpacity onPress={goToPreviousMonth}>
-          <Text style={styles.arrow}>{'‹'}</Text>
-        </TouchableOpacity>
-        <Text style={styles.monthText}>{displayYearMonth()}</Text>
-        <TouchableOpacity onPress={goToNextMonth}>
-          <Text style={styles.arrow}>{'›'}</Text>
-        </TouchableOpacity>
-      </View>
-
-      <Calendar
-        key={currentDate} // 強制刷新以更新月份
-        current={currentDate}
-        onDayPress={onDayPress}
-        markingType={'period'}
-        markedDates={getMarkedDates(startDate, endDate)}
-        hideArrows={true}
-        hideExtraDays={false}
-        disableMonthChange={true}
-        renderHeader={() => null} // 隱藏內建標題列
-        theme={{
-          backgroundColor: '#fff',
-          calendarBackground: '#fff',
-          textSectionTitleColor: '#333',
-          selectedDayBackgroundColor: '#1E90FF',
-          selectedDayTextColor: '#fff',
-          todayTextColor: '#1E90FF',
-          dayTextColor: '#222',
-          textDisabledColor: '#ccc',
-          arrowColor: '#1E90FF',
-          textDayFontWeight: '500',
-          textMonthFontSize: 20,
-          textMonthFontWeight: 'bold',
-          textDayFontSize: 16,
-          textDayHeaderFontSize: 14,
-        }}
-      />
-    </View>
+    <FlatList
+      data={monthList}
+      keyExtractor={item => item.format('YYYY-MM')}
+      renderItem={({item}) => renderMonth(item)}
+      contentContainerStyle={styles.container}
+      initialNumToRender={3} // 初次只渲染 3 個月
+      maxToRenderPerBatch={2} // 每次滑動最多額外渲染 2 個月
+      windowSize={5} // 可視範圍大小
+      removeClippedSubviews={true} // 移除畫面外的元件以節省記憶體
+    />
   );
-};
-
-const getMarkedDates = (start: string | null, end: string | null) => {
-  if (!start) return {};
-  if (!end) {
-    return {
-      [start]: {
-        startingDay: true,
-        endingDay: true,
-        color: '#dfeeff',
-        textColor: 'black',
-      },
-    };
-  }
-
-  const dates: any = {};
-  let current = new Date(start);
-  const endDate = new Date(end);
-
-  while (current <= endDate) {
-    const dateStr = formatDate(current);
-    dates[dateStr] = {
-      color: '#dfeeff',
-      textColor: 'black',
-      ...(dateStr === start && {startingDay: true}),
-      ...(dateStr === end && {endingDay: true}),
-    };
-    current.setDate(current.getDate() + 1);
-  }
-  return dates;
 };
 
 const styles = StyleSheet.create({
   container: {
-    padding: 16,
+    padding: 8,
   },
-  customHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+  monthContainer: {
     marginBottom: 8,
   },
-  arrow: {
-    fontSize: 24,
-    color: '#1E90FF',
-    paddingHorizontal: 12,
-  },
-  monthText: {
+  monthLabel: {
     fontSize: 18,
     fontWeight: 'bold',
+    marginBottom: 16,
+  },
+  weekHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    marginBottom: 4,
+  },
+  weekDay: {
+    flex: 1,
+    textAlign: 'center',
+    fontWeight: '600',
+    color: '#888',
+  },
+  daysGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+  },
+  dayBox: {
+    width: '14.28%',
+    height: 40,
+    aspectRatio: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginVertical: 2,
+    borderRadius: 6,
+  },
+  dayText: {
     color: '#000',
+  },
+  disabledDayText: {
+    color: '#ccc',
+  },
+  selectedDay: {
+    backgroundColor: '#007bff',
+  },
+  inRangeDay: {
+    backgroundColor: '#d0e8ff',
   },
 });
