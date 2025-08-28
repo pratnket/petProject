@@ -7,9 +7,16 @@ import {FaHome, FaHeart, FaUser} from 'react-icons/fa'; // 使用 react-icons
 import HomeScreen from '../../screens/HomeScreen';
 import HeartScreen from '../../screens/HeartScreen';
 import MemberScreen from '../../screens/MemberScreen';
+import AuthScreen from '../../screens/AuthScreen';
 
 // 搜索頁
 import SearchScreen from '../../screens/SearchScreen';
+
+// 旅館詳細頁
+import HotelDetailScreen from '../../screens/HotelDetailScreen';
+
+// 選擇方案詳細頁
+import BookingScreen from '../../screens/BookingScreen';
 
 // 使用 AuthContext
 import {useAuth} from '../../context/AuthContext';
@@ -20,7 +27,15 @@ const Tab = createBottomTabNavigator();
 // ✅ 把 tabBarIcon 抽出來
 const getTabBarIcon =
   (routeName: string) =>
-  ({focused, color, size}: {focused: boolean; color: string; size: number}) => {
+  ({
+    _focused,
+    color,
+    size,
+  }: {
+    _focused: boolean;
+    color: string;
+    size: number;
+  }) => {
     let icon = null;
 
     if (routeName === 'Home') {
@@ -40,6 +55,7 @@ const TabNavigator = () => {
 
   return (
     <Tab.Navigator
+      id={undefined}
       initialRouteName="Home"
       screenOptions={({route}) => ({
         tabBarIcon: getTabBarIcon(route.name), // 這樣就沒問題了
@@ -64,6 +80,9 @@ const TabNavigator = () => {
 export type RootStackParamList = {
   Main: undefined;
   Search: {keyword: string};
+  HotelDetailScreen: {keyword: string};
+  BookingScreen: {keyword: string};
+  Auth: {defaultTab?: 'login' | 'register'};
 };
 
 const Stack = createStackNavigator<RootStackParamList>();
@@ -72,6 +91,7 @@ const Stack = createStackNavigator<RootStackParamList>();
 const MainNavigator = () => {
   return (
     <Stack.Navigator
+      id={undefined}
       initialRouteName="Main"
       screenOptions={{
         headerStyle: {backgroundColor: '#6200ee'},
@@ -88,6 +108,77 @@ const MainNavigator = () => {
         name="Search"
         component={SearchScreen}
         options={{headerShown: false}}
+      />
+      <Stack.Screen
+        name="HotelDetailScreen"
+        component={HotelDetailScreen}
+        options={{headerShown: false}}
+      />
+      <Stack.Screen
+        name="BookingScreen"
+        component={BookingScreen}
+        options={{headerShown: false}}
+      />
+      <Stack.Screen
+        name="Auth"
+        component={AuthScreen}
+        options={{
+          title: '登入與註冊',
+          headerShown: true,
+          headerStyle: {
+            backgroundColor: '#FFFFFF',
+            height: 42,
+          },
+          headerTitleStyle: {
+            fontFamily: 'Noto Sans TC',
+            fontWeight: '700',
+            fontSize: 16,
+            textAlign: 'center',
+          },
+          headerTintColor: '#000000',
+          // 🎨 Web 版本動畫優化
+          transitionSpec: {
+            open: {
+              animation: 'timing',
+              config: {
+                duration: 400,
+                easing: require('react-native').Easing.bezier(0.4, 0.0, 0.2, 1),
+              },
+            },
+            close: {
+              animation: 'timing',
+              config: {
+                duration: 300,
+                easing: require('react-native').Easing.bezier(0.4, 0.0, 0.2, 1),
+              },
+            },
+          },
+          // 🎭 Web 版本過渡效果
+          cardStyleInterpolator: ({current}) => {
+            return {
+              cardStyle: {
+                transform: [
+                  {
+                    scale: current.progress.interpolate({
+                      inputRange: [0, 1],
+                      outputRange: [0.85, 1],
+                    }),
+                  },
+                ],
+                opacity: current.progress.interpolate({
+                  inputRange: [0, 1],
+                  outputRange: [0.6, 1],
+                }),
+              },
+              overlayStyle: {
+                opacity: current.progress.interpolate({
+                  inputRange: [0, 1],
+                  outputRange: [0, 0.3],
+                }),
+              },
+            };
+          },
+        }}
       />
     </Stack.Navigator>
   );

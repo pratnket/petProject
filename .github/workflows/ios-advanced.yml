@@ -1,0 +1,120 @@
+name: iOS Advanced Build
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+  workflow_dispatch:
+    inputs:
+      build_type:
+        description: 'Build type'
+        required: true
+        default: 'debug'
+        type: choice
+        options:
+          - debug
+          - release
+
+env:
+  NODE_VERSION: '18'
+  RUBY_VERSION: '3.0'
+
+jobs:
+  test:
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'yarn'
+
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+
+      - name: Run tests
+        run: yarn test
+
+      - name: Run linting
+        run: yarn lint
+
+  build-ios:
+    needs: test
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'yarn'
+
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+
+      - name: Setup Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: ${{ env.RUBY_VERSION }}
+          bundler-cache: true
+
+      - name: Install iOS dependencies
+        run: |
+          cd ios
+          pod install
+          cd ..
+
+      - name: Build iOS Debug
+        if: github.event.inputs.build_type == 'debug' || github.event_name != 'workflow_dispatch'
+        run: |
+          cd ios
+          xcodebuild -workspace PetProject.xcworkspace \
+                     -scheme PetProject \
+                     -configuration Debug \
+                     -destination 'generic/platform=iOS' \
+                     -archivePath PetProject-Debug.xcarchive \
+                     archive
+          cd ..
+
+      - name: Build iOS Release
+        if: github.event.inputs.build_type == 'release'
+        run: |
+          cd ios
+          xcodebuild -workspace PetProject.xcworkspace \
+                     -scheme PetProject \
+                     -configuration Release \
+                     -destination 'generic/platform=iOS' \
+                     -archivePath PetProject-Release.xcarchive \
+                     archive
+          cd ..
+
+      - name: Upload Debug build
+        if: github.event.inputs.build_type == 'debug' || github.event_name != 'workflow_dispatch'
+        uses: actions/upload-artifact@v4
+        with:
+          name: ios-debug-build
+          path: ios/PetProject-Debug.xcarchive
+          retention-days: 7
+
+      - name: Upload Release build
+        if: github.event.inputs.build_type == 'release'
+        uses: actions/upload-artifact@v4
+        with:
+          name: ios-release-build
+          path: ios/PetProject-Release.xcarchive
+          retention-days: 7
+
+      - name: Build summary
+        run: |
+          echo "🎉 iOS build completed successfully!"
+          echo "Build type: ${{ github.event.inputs.build_type || 'debug' }}"
+          echo "Branch: ${{ github.ref_name }}"
+          echo "Commit: ${{ github.sha }}"

@@ -10,6 +10,7 @@ const navigation = Platform.select({
 export type RootStackParamList = {
   Main: undefined;
   Search: {keyword: string};
+  Auth: {defaultTab?: 'login' | 'register'};
 };
 
 export default navigation;

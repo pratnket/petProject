@@ -4,6 +4,7 @@ const mockHotels = [
   {
     id: 1,
     imageUrl: '/assets/mockData/001.webp',
+    coverImage: '/assets/mockData/001.webp',
     title: '測試旅館 1 號',
     distance: '381m',
     rating: 4,
@@ -13,6 +14,7 @@ const mockHotels = [
   {
     id: 2,
     imageUrl: '/assets/mockData/002.webp',
+    coverImage: '/assets/mockData/002.webp',
     title: '測試旅館 2 號',
     distance: '382m',
     rating: 3,
@@ -22,6 +24,7 @@ const mockHotels = [
   {
     id: 3,
     imageUrl: '/assets/mockData/003.webp',
+    coverImage: '/assets/mockData/003.webp',
     title: '測試旅館 3 號',
     distance: '383m',
     rating: 5,
@@ -31,6 +34,7 @@ const mockHotels = [
   {
     id: 4,
     imageUrl: '/assets/mockData/004.webp',
+    coverImage: '/assets/mockData/004.webp',
     title: '測試旅館 4 號',
     distance: '384m',
     rating: 4,
@@ -40,6 +44,7 @@ const mockHotels = [
   {
     id: 5,
     imageUrl: '/assets/mockData/005.webp',
+    coverImage: '/assets/mockData/005.webp',
     title: '測試旅館 5 號',
     distance: '385m',
     rating: 3,
@@ -49,6 +54,7 @@ const mockHotels = [
   {
     id: 6,
     imageUrl: '/assets/mockData/006.webp',
+    coverImage: '/assets/mockData/006.webp',
     title: '測試旅館 6 號',
     distance: '386m',
     rating: 5,
@@ -58,6 +64,7 @@ const mockHotels = [
   {
     id: 7,
     imageUrl: '/assets/mockData/007.webp',
+    coverImage: '/assets/mockData/007.webp',
     title: '測試旅館 7 號',
     distance: '387m',
     rating: 4,
@@ -67,6 +74,7 @@ const mockHotels = [
   {
     id: 8,
     imageUrl: '/assets/mockData/008.webp',
+    coverImage: '/assets/mockData/008.webp',
     title: '測試旅館 8 號',
     distance: '388m',
     rating: 3,
@@ -76,6 +84,7 @@ const mockHotels = [
   {
     id: 9,
     imageUrl: '/assets/mockData/009.webp',
+    coverImage: '/assets/mockData/009.webp',
     title: '測試旅館 9 號',
     distance: '389m',
     rating: 5,
@@ -85,6 +94,7 @@ const mockHotels = [
   {
     id: 10,
     imageUrl: '/assets/mockData/010.webp',
+    coverImage: '/assets/mockData/010.webp',
     title: '測試旅館 10 號',
     distance: '390m',
     rating: 4,
@@ -94,6 +104,7 @@ const mockHotels = [
   {
     id: 11,
     imageUrl: '/assets/mockData/011.webp',
+    coverImage: '/assets/mockData/011.webp',
     title: '測試旅館 11 號',
     distance: '391m',
     rating: 3,
@@ -103,6 +114,7 @@ const mockHotels = [
   {
     id: 12,
     imageUrl: '/assets/mockData/012.webp',
+    coverImage: '/assets/mockData/012.webp',
     title: '測試旅館 12 號',
     distance: '392m',
     rating: 5,
@@ -112,6 +124,7 @@ const mockHotels = [
   {
     id: 13,
     imageUrl: '/assets/mockData/013.webp',
+    coverImage: '/assets/mockData/013.webp',
     title: '測試旅館 13 號',
     distance: '393m',
     rating: 4,
@@ -121,6 +134,7 @@ const mockHotels = [
   {
     id: 14,
     imageUrl: '/assets/mockData/014.webp',
+    coverImage: '/assets/mockData/014.webp',
     title: '測試旅館 14 號',
     distance: '394m',
     rating: 3,
@@ -130,6 +144,7 @@ const mockHotels = [
   {
     id: 15,
     imageUrl: '/assets/mockData/015.webp',
+    coverImage: '/assets/mockData/015.webp',
     title: '測試旅館 15 號',
     distance: '395m',
     rating: 5,
@@ -139,6 +154,7 @@ const mockHotels = [
   {
     id: 16,
     imageUrl: '/assets/mockData/016.webp',
+    coverImage: '/assets/mockData/016.webp',
     title: '測試旅館 16 號',
     distance: '396m',
     rating: 4,
@@ -147,7 +163,8 @@ const mockHotels = [
   },
   {
     id: 17,
-    imageUrl: '8assets/mockData/017.webp',
+    imageUrl: '/assets/mockData/017.webp',
+    coverImage: '/assets/mockData/017.webp',
     title: '測試旅館 17 號',
     distance: '397m',
     rating: 3,
@@ -157,6 +174,7 @@ const mockHotels = [
   {
     id: 18,
     imageUrl: '/assets/mockData/018.webp',
+    coverImage: '/assets/mockData/018.webp',
     title: '測試旅館 18 號',
     distance: '398m',
     rating: 5,
@@ -166,6 +184,7 @@ const mockHotels = [
   {
     id: 19,
     imageUrl: '/assets/mockData/019.webp',
+    coverImage: '/assets/mockData/019.webp',
     title: '測試旅館 19 號',
     distance: '399m',
     rating: 4,
@@ -175,6 +194,7 @@ const mockHotels = [
   {
     id: 20,
     imageUrl: '/assets/mockData/020.webp',
+    coverImage: '/assets/mockData/020.webp',
     title: '測試旅館 20 號',
     distance: '400m',
     rating: 3,
@@ -184,6 +204,7 @@ const mockHotels = [
   {
     id: 21,
     imageUrl: '/assets/mockData/021.webp',
+    coverImage: '/assets/mockData/021.webp',
     title: '測試旅館 21 號',
     distance: '401m',
     rating: 5,
@@ -193,6 +214,7 @@ const mockHotels = [
   {
     id: 22,
     imageUrl: '/assets/mockData/022.webp',
+    coverImage: '/assets/mockData/022.webp',
     title: '測試旅館 22 號',
     distance: '402m',
     rating: 4,
@@ -202,6 +224,7 @@ const mockHotels = [
   {
     id: 23,
     imageUrl: '/assets/mockData/023.webp',
+    coverImage: '/assets/mockData/023.webp',
     title: '測試旅館 23 號',
     distance: '403m',
     rating: 3,
@@ -211,6 +234,7 @@ const mockHotels = [
   {
     id: 24,
     imageUrl: '/assets/mockData/024.webp',
+    coverImage: '/assets/mockData/024.webp',
     title: '測試旅館 24 號',
     distance: '404m',
     rating: 5,
@@ -220,6 +244,7 @@ const mockHotels = [
   {
     id: 25,
     imageUrl: '/assets/mockData/025.webp',
+    coverImage: '/assets/mockData/025.webp',
     title: '測試旅館 25 號',
     distance: '405m',
     rating: 4,

@@ -1,0 +1,15 @@
+yarn react-native start --reset-cache
+
+重新安裝所有原生模組並重新 build
+
+rd /s /q node_modules
+del yarn.lock
+yarn cache clean
+yarn install
+
+cd android
+gradlew.bat clean
+cd ..
+
+yarn react-native start --reset-cache
+yarn android

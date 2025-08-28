@@ -1,0 +1,58 @@
+name: iOS Build
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+  workflow_dispatch: # 允許手動觸發
+
+jobs:
+  build-ios:
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'yarn'
+
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+
+      - name: Setup Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.0'
+          bundler-cache: true
+
+      - name: Install iOS dependencies
+        run: |
+          cd ios
+          pod install
+          cd ..
+
+      - name: Build iOS
+        run: |
+          cd ios
+          xcodebuild -workspace PetProject.xcworkspace \
+                     -scheme PetProject \
+                     -configuration Release \
+                     -destination 'generic/platform=iOS' \
+                     -archivePath PetProject.xcarchive \
+                     archive
+          cd ..
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ios-build
+          path: ios/PetProject.xcarchive
+          retention-days: 7
+
+      - name: Build status
+        run: echo "iOS build completed successfully!"

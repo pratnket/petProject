@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useState, useEffect, useRef} from 'react';
 import {
   View,
   StyleSheet,
@@ -16,11 +16,16 @@ import {useSearchHistory} from '../context/SearchHistoryContext';
 import {useNavigation} from '@react-navigation/native';
 import {StackNavigationProp} from '@react-navigation/stack';
 import {RootStackParamList} from '../navigation/MainNavigator';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // Modals
 import LocationModal from '../modals/LocationModal';
 import DateModal from '../modals/DateModal';
 import AnimalModal from '../modals/AnimalModal';
+import WelcomeModal from '../modals/WelcomeModal';
+
+// Components
+import FloatingTestButton from '../components/common/FloatingTestButton';
 
 const formatDateWithWeekday = (dateStr: string) => {
   const date = new Date(dateStr);
@@ -36,6 +41,36 @@ const HomeScreen: React.FC = () => {
   const {dateRange} = condition;
 
   const [loading, setLoading] = useState(false);
+
+  // 使用 useRef 來避免 useEffect 依賴問題
+  const openModalRef = useRef(openModal);
+  openModalRef.current = openModal;
+
+  // 檢查是否首次啟動，顯示歡迎Modal
+  useEffect(() => {
+    if (Platform.OS === 'web') {
+      // 網頁版跳過歡迎Modal
+      return;
+    }
+
+    const checkFirstLaunch = async () => {
+      try {
+        const hasSeenWelcome = await AsyncStorage.getItem('hasSeenWelcome');
+        console.log('🔍 檢查首次啟動 - hasSeenWelcome:', hasSeenWelcome);
+
+        if (!hasSeenWelcome) {
+          // 沒有看過歡迎Modal，顯示它
+          console.log('🎉 首次啟動，顯示歡迎Modal');
+          openModalRef.current('welcome');
+        } else {
+          console.log('✅ 已經看過歡迎Modal，不顯示');
+        }
+      } catch (error) {
+        console.error('檢查首次啟動失敗:', error);
+      }
+    };
+    checkFirstLaunch();
+  }, []); // 移除 openModal 依賴，避免無限循環
 
   const handleSearch = () => {
     const keyword = condition.keyword.trim();
@@ -123,6 +158,10 @@ const HomeScreen: React.FC = () => {
       {activeModal === 'location' && <LocationModal />}
       {activeModal === 'date' && <DateModal />}
       {activeModal === 'animal' && <AnimalModal />}
+      {activeModal === 'welcome' && <WelcomeModal />}
+
+      {/* 可拖曳的測試按鈕 */}
+      <FloatingTestButton visible={__DEV__} />
     </View>
   );
 };

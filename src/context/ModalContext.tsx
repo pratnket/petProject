@@ -1,6 +1,6 @@
 import React, {createContext, useContext, useState} from 'react';
 
-type ModalKeys = 'location' | 'date' | 'animal';
+type ModalKeys = 'location' | 'date' | 'animal' | 'selectPlan' | 'welcome';
 
 type ModalContextType = {
   activeModal: ModalKeys | null;
