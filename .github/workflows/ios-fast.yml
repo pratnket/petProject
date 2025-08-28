@@ -72,12 +72,8 @@ jobs:
           echo "🔍 檢查可用的 Xcode schemes："
           echo "📁 當前目錄："
           pwd
-          echo "📱 檢查 workspace 文件："
-          ls -la *.xcworkspace || echo "❌ 找不到 workspace 文件"
-          echo "📋 檢查 project 文件："
+          echo "📱 檢查 project 文件："
           ls -la *.xcodeproj || echo "❌ 找不到 project 文件"
-          echo "🔍 從 workspace 列出 schemes："
-          xcodebuild -workspace PetProject.xcworkspace -list || echo "❌ workspace 命令失敗"
           echo "🔍 從 project 列出 schemes："
           xcodebuild -project PetProject.xcodeproj -list || echo "❌ project 命令失敗"
 
@@ -89,30 +85,20 @@ jobs:
 
           # 檢查必要文件
           echo "📱 檢查構建文件："
-          ls -la PetProject.xcworkspace || echo "❌ 找不到 workspace 文件"
           ls -la PetProject.xcodeproj || echo "❌ 找不到 project 文件"
 
           # 使用增量構建，不清除之前的構建
           echo "🔨 開始構建..."
 
-          # 嘗試使用 workspace 構建
-          echo "🔨 嘗試使用 workspace 構建..."
-          xcodebuild -workspace PetProject.xcworkspace \
+          # 直接使用 project 文件構建
+          echo "🔨 使用 project 文件構建..."
+          xcodebuild -project PetProject.xcodeproj \
                      -scheme AwesomeProject \
                      -configuration Debug \
                      -destination 'generic/platform=iOS Simulator' \
                      -derivedDataPath build \
                      -allowProvisioningUpdates \
-                     build || {
-            echo "❌ workspace 構建失敗，嘗試使用 project 文件："
-            xcodebuild -project PetProject.xcodeproj \
-                       -scheme AwesomeProject \
-                       -configuration Debug \
-                       -destination 'generic/platform=iOS Simulator' \
-                       -derivedDataPath build \
-                       -allowProvisioningUpdates \
-                       build
-          }
+                     build
 
           echo "⏱️ 結束時間: $(date)"
 
