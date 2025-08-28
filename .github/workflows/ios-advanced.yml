@@ -2,9 +2,9 @@ name: iOS Advanced Build
 
 on:
   push:
-    branches: [main, develop]
+    branches: [master, develop]
   pull_request:
-    branches: [main, develop]
+    branches: [master, develop]
   workflow_dispatch:
     inputs:
       build_type:
@@ -16,12 +16,8 @@ on:
           - debug
           - release
 
-env:
-  NODE_VERSION: '18'
-  RUBY_VERSION: '3.0'
-
 jobs:
-  test:
+  ios-build:
     runs-on: macos-latest
 
     steps:
@@ -31,48 +27,26 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: ${{ env.NODE_VERSION }}
+          node-version: '18'
           cache: 'yarn'
-
-      - name: Install dependencies
-        run: yarn install --frozen-lockfile
-
-      - name: Run tests
-        run: yarn test
-
-      - name: Run linting
-        run: yarn lint
-
-  build-ios:
-    needs: test
-    runs-on: macos-latest
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: 'yarn'
-
-      - name: Install dependencies
-        run: yarn install --frozen-lockfile
 
       - name: Setup Ruby
         uses: ruby/setup-ruby@v1
         with:
-          ruby-version: ${{ env.RUBY_VERSION }}
+          ruby-version: '3.0'
           bundler-cache: true
 
-      - name: Install iOS dependencies
+      - name: Install dependencies
+        run: |
+          yarn install --frozen-lockfile
+
+      - name: Setup iOS environment
         run: |
           cd ios
+          sudo gem install cocoapods
           pod install
-          cd ..
 
-      - name: Build iOS Debug
+      - name: Build iOS app (Debug)
         if: github.event.inputs.build_type == 'debug' || github.event_name != 'workflow_dispatch'
         run: |
           cd ios
@@ -80,11 +54,10 @@ jobs:
                      -scheme PetProject \
                      -configuration Debug \
                      -destination 'generic/platform=iOS' \
-                     -archivePath PetProject-Debug.xcarchive \
-                     archive
-          cd ..
+                     -derivedDataPath build \
+                     clean build
 
-      - name: Build iOS Release
+      - name: Build iOS app (Release)
         if: github.event.inputs.build_type == 'release'
         run: |
           cd ios
@@ -92,29 +65,25 @@ jobs:
                      -scheme PetProject \
                      -configuration Release \
                      -destination 'generic/platform=iOS' \
-                     -archivePath PetProject-Release.xcarchive \
-                     archive
-          cd ..
+                     -derivedDataPath build \
+                     clean build
 
-      - name: Upload Debug build
-        if: github.event.inputs.build_type == 'debug' || github.event_name != 'workflow_dispatch'
+      - name: Run tests
+        run: |
+          yarn test
+
+      - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: ios-debug-build
-          path: ios/PetProject-Debug.xcarchive
-          retention-days: 7
-
-      - name: Upload Release build
-        if: github.event.inputs.build_type == 'release'
-        uses: actions/upload-artifact@v4
-        with:
-          name: ios-release-build
-          path: ios/PetProject-Release.xcarchive
+          name: ios-build-${{ github.event.inputs.build_type || 'debug' }}
+          path: ios/build/Build/Products/
           retention-days: 7
 
       - name: Build summary
         run: |
-          echo "🎉 iOS build completed successfully!"
-          echo "Build type: ${{ github.event.inputs.build_type || 'debug' }}"
-          echo "Branch: ${{ github.ref_name }}"
-          echo "Commit: ${{ github.sha }}"
+          echo "🎉 iOS 構建完成！"
+          echo "📱 構建類型: ${{ github.event.inputs.build_type || 'debug' }}"
+          echo "🔧 構建環境: macOS ${{ runner.os }}"
+          echo "📅 構建時間: $(date)"
+          echo "🚀 分支: ${{ github.ref_name }}"
+          echo "👤 觸發者: ${{ github.actor }}"

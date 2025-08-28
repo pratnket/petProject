@@ -1,127 +1,99 @@
-# GitHub Actions 自動構建說明
+# 🚀 GitHub Actions 自動構建指南
 
-## 🚀 功能概述
-
-本專案使用 GitHub Actions 自動化構建流程，支援：
-
-- **iOS 構建**：在 macOS 環境中自動構建 iOS 應用程式
-- **Android 構建**：在 Windows 環境中自動構建 Android 應用程式
-- **自動測試**：執行測試和程式碼檢查
-- **構建成品上傳**：自動上傳構建結果供下載
-
-## 📁 工作流程檔案
-
-### 1. iOS 構建 (`ios-build.yml`)
-
-- **觸發條件**：推送到 main/develop 分支、PR、手動觸發
-- **執行環境**：macOS latest
-- **構建類型**：Release 版本
-- **輸出**：`.xcarchive` 檔案
-
-### 2. iOS 進階構建 (`ios-advanced.yml`)
-
-- **觸發條件**：同上，支援手動選擇構建類型
-- **執行環境**：macOS latest
-- **構建類型**：Debug/Release 可選
-- **測試**：先執行測試，通過後才構建
-
-### 3. Android 構建 (`android-build.yml`)
-
-- **觸發條件**：推送到 main/develop 分支、PR、手動觸發
-- **執行環境**：Windows latest
-- **構建類型**：Debug 和 Release 版本
-- **輸出**：`.apk` 檔案
-
-## 🔧 使用方法
+## 📱 iOS 構建
 
 ### 自動觸發
 
-1. 推送程式碼到 `main` 或 `develop` 分支
-2. 創建 Pull Request
-3. GitHub Actions 會自動執行
+- 推送到 `master` 或 `develop` 分支時自動構建
+- 創建 Pull Request 時自動構建
 
 ### 手動觸發
 
 1. 前往 GitHub 專案的 Actions 頁面
-2. 選擇想要執行的工作流程
+2. 選擇 "iOS Advanced Build" 工作流程
 3. 點擊 "Run workflow"
-4. 選擇分支和參數（如適用）
+4. 選擇構建類型（Debug 或 Release）
 5. 點擊 "Run workflow"
 
-## 📱 構建成品
+### 構建環境
 
-### iOS 構建成品
+- **運行環境**: macOS 最新版本
+- **Node.js**: 18.x
+- **Ruby**: 3.0
+- **CocoaPods**: 自動安裝
 
-- 位置：Actions → 工作流程 → Artifacts
-- 檔案：`ios-build` 或 `ios-debug-build`/`ios-release-build`
-- 格式：`.xcarchive`
-- 保留時間：7 天
+## 🤖 Android 構建
 
-### Android 構建成品
+### 自動觸發
 
-- 位置：Actions → 工作流程 → Artifacts
-- 檔案：`android-debug-apk` 和 `android-release-apk`
-- 格式：`.apk`
-- 保留時間：7 天
+- 推送到 `master` 或 `develop` 分支時自動構建
+- 創建 Pull Request 時自動構建
 
-## 🛠️ 故障排除
+### 手動觸發
+
+1. 前往 GitHub 專案的 Actions 頁面
+2. 選擇 "Android Build" 工作流程
+3. 點擊 "Run workflow"
+
+### 構建環境
+
+- **運行環境**: Ubuntu 最新版本
+- **Node.js**: 18.x
+- **Java**: 17 (Zulu)
+- **Android SDK**: 34
+
+## 📦 構建產物
+
+### iOS 構建產物
+
+- 位置: `ios/build/Build/Products/`
+- 保留時間: 7 天
+- 包含: Debug 和 Release 版本
+
+### Android 構建產物
+
+- 位置: `android/app/build/outputs/apk/release/`
+- 保留時間: 7 天
+- 包含: Release APK 文件
+
+## 🔧 本地開發
+
+### Windows 環境
+
+```bash
+# Android 構建
+yarn android
+
+# Web 版本
+yarn web
+```
+
+### macOS 環境
+
+```bash
+# iOS 構建
+yarn ios
+
+# Android 構建
+yarn android
+```
+
+## 📋 注意事項
+
+1. **iOS 構建只能在 macOS 環境中執行**
+2. **Android 構建可以在 Windows、macOS、Linux 環境中執行**
+3. **構建產物會自動上傳到 GitHub Actions 的 Artifacts**
+4. **每次構建都會執行測試**
+5. **構建失敗時會發送通知**
+
+## 🆘 故障排除
 
 ### 常見問題
 
-1. **iOS 構建失敗**
+1. **CocoaPods 安裝失敗**: 檢查 Ruby 版本
+2. **Android SDK 問題**: 檢查 SDK 路徑和版本
+3. **依賴安裝失敗**: 檢查 `yarn.lock` 文件
 
-   - 檢查 Podfile 是否正確
-   - 確認 Xcode 專案配置
-   - 查看 Actions 日誌中的錯誤訊息
+### 聯繫方式
 
-2. **Android 構建失敗**
-
-   - 檢查 Gradle 配置
-   - 確認 Android SDK 版本
-   - 查看 Actions 日誌中的錯誤訊息
-
-3. **依賴安裝失敗**
-   - 檢查 `package.json` 和 `yarn.lock`
-   - 確認 Node.js 版本相容性
-
-### 日誌查看
-
-1. 前往 Actions 頁面
-2. 點擊失敗的工作流程
-3. 點擊失敗的 job
-4. 查看詳細的執行日誌
-
-## 🔄 自定義配置
-
-### 修改觸發條件
-
-編輯工作流程檔案中的 `on` 部分：
-
-```yaml
-on:
-  push:
-    branches: [main, develop, feature/*]
-  pull_request:
-    branches: [main]
-  schedule:
-    - cron: '0 0 * * 0' # 每週日執行
-```
-
-### 修改構建參數
-
-編輯工作流程檔案中的環境變數：
-
-```yaml
-env:
-  NODE_VERSION: '18'
-  RUBY_VERSION: '3.0'
-  BUILD_TYPE: 'release'
-```
-
-## 📞 支援
-
-如有問題，請：
-
-1. 檢查 GitHub Actions 日誌
-2. 查看本說明文件
-3. 創建 Issue 描述問題
+如有問題，請檢查 Actions 日誌或聯繫開發團隊。

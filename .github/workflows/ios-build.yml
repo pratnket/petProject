@@ -2,13 +2,13 @@ name: iOS Build
 
 on:
   push:
-    branches: [main, develop]
+    branches: [master, develop]
   pull_request:
-    branches: [main, develop]
+    branches: [master, develop]
   workflow_dispatch: # 允許手動觸發
 
 jobs:
-  build-ios:
+  ios-build:
     runs-on: macos-latest
 
     steps:
@@ -21,38 +21,41 @@ jobs:
           node-version: '18'
           cache: 'yarn'
 
-      - name: Install dependencies
-        run: yarn install --frozen-lockfile
-
       - name: Setup Ruby
         uses: ruby/setup-ruby@v1
         with:
           ruby-version: '3.0'
           bundler-cache: true
 
-      - name: Install iOS dependencies
+      - name: Install dependencies
+        run: |
+          yarn install --frozen-lockfile
+
+      - name: Setup iOS environment
         run: |
           cd ios
+          sudo gem install cocoapods
           pod install
-          cd ..
 
-      - name: Build iOS
+      - name: Build iOS app
         run: |
           cd ios
           xcodebuild -workspace PetProject.xcworkspace \
                      -scheme PetProject \
                      -configuration Release \
                      -destination 'generic/platform=iOS' \
-                     -archivePath PetProject.xcarchive \
-                     archive
-          cd ..
+                     -derivedDataPath build \
+                     clean build
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         with:
           name: ios-build
-          path: ios/PetProject.xcarchive
+          path: ios/build/Build/Products/Release-iphoneos/
           retention-days: 7
 
       - name: Build status
-        run: echo "iOS build completed successfully!"
+        run: |
+          echo "✅ iOS 構建完成！"
+          echo "📱 構建時間: $(date)"
+          echo "🔧 構建環境: macOS ${{ runner.os }}"
