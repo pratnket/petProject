@@ -36,7 +36,7 @@ jobs:
       - name: Setup Java
         uses: actions/setup-java@v4
         with:
-          distribution: 'temurin'
+          distribution: 'zulu'
           java-version: '17'
 
       - name: Install dependencies
@@ -44,7 +44,10 @@ jobs:
           yarn install --frozen-lockfile
 
       - name: Setup Android SDK
-        uses: android-actions/setup-android@v0
+        uses: android-actions/setup-android@v2
+        with:
+          sdk-platform: '34'
+          sdk-build-tools: '34.0.0'
 
       - name: Build Android app
         run: |
