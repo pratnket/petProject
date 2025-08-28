@@ -1,0 +1,96 @@
+name: iOS Build - 修復路徑問題
+
+on:
+  workflow_dispatch: # 只允許手動觸發
+
+jobs:
+  ios-build-fixed-path:
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Setup Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.0'
+
+      - name: Verify project structure
+        run: |
+          echo "🔍 === 驗證專案結構 ==="
+          echo "📁 當前目錄："
+          pwd
+          echo ""
+
+          echo "📱 檢查 iOS 目錄："
+          ls -la ios/
+          echo ""
+
+          echo "📋 檢查專案文件："
+          ls -la ios/*.xcodeproj
+          echo ""
+
+          echo "📦 檢查 Podfile："
+          ls -la ios/Podfile
+          echo ""
+
+      - name: Install dependencies
+        run: |
+          echo "📦 === 安裝依賴 ==="
+
+          # 安裝 Node.js 依賴
+          yarn install --frozen-lockfile
+
+          # 安裝 iOS 依賴
+          cd ios
+          pod install
+
+      - name: List available schemes
+        run: |
+          cd ios
+          echo "🔍 === 列出可用的 Schemes ==="
+
+          echo "📱 從 Project 列出 schemes："
+          xcodebuild -project PetProject.xcodeproj -list
+          echo ""
+
+      - name: Build iOS app (修復路徑)
+        run: |
+          cd ios
+          echo "🔨 === 開始 iOS 構建（修復路徑）==="
+
+          echo "📁 當前工作目錄："
+          pwd
+          echo ""
+
+          echo "📱 專案文件確認："
+          ls -la *.xcodeproj
+          echo ""
+
+          echo "🔨 開始構建..."
+          xcodebuild -project PetProject.xcodeproj \
+                     -scheme PetProject \
+                     -configuration Debug \
+                     -destination 'generic/platform=iOS Simulator' \
+                     -derivedDataPath build \
+                     build
+
+      - name: Success notification
+        if: success()
+        run: |
+          echo "🎉 iOS 構建成功！"
+          echo "✅ 路徑問題已解決"
+          echo "💡 專案配置正確"
+
+      - name: Failure notification
+        if: failure()
+        run: |
+          echo "❌ iOS 構建仍然失敗"
+          echo "🔍 需要進一步分析"
+          echo "💡 請檢查構建日誌"
