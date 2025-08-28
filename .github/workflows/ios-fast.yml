@@ -1,0 +1,114 @@
+name: iOS Fast Build (Debug Only)
+
+on:
+  push:
+    branches: [master, develop]
+  pull_request:
+    branches: [master, develop]
+  workflow_dispatch: # 允許手動觸發
+
+jobs:
+  ios-fast-build:
+    runs-on: macos-latest
+
+    # 優化：使用更快的 macOS 版本
+    strategy:
+      matrix:
+        xcode: ['15.4'] # 使用較新但穩定的 Xcode 版本
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js with cache
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'yarn'
+          cache-dependency-path: |
+            **/yarn.lock
+            **/package.json
+
+      - name: Setup Ruby with cache
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.0'
+          bundler-cache: true
+
+      - name: Cache CocoaPods
+        uses: actions/cache@v4
+        with:
+          path: ios/Pods
+          key: ${{ runner.os }}-pods-${{ hashFiles('ios/Podfile.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-pods-
+
+      - name: Install dependencies (parallel)
+        run: |
+          echo "📦 並行安裝依賴..."
+          yarn install --frozen-lockfile &
+          cd ios && pod install --repo-update &
+          wait
+        shell: bash
+
+      - name: Show iOS project structure
+        run: |
+          cd ios
+          echo "📁 iOS 專案結構："
+          ls -la
+          echo "📱 Podfile 內容："
+          cat Podfile
+
+      - name: List available schemes
+        run: |
+          cd ios
+          echo "🔍 檢查可用的 Xcode schemes："
+          xcodebuild -workspace PetProject.xcworkspace -list
+
+      - name: Build iOS app (Debug only)
+        run: |
+          cd ios
+          echo "🔨 開始快速構建 Debug 版本..."
+          echo "⏱️ 開始時間: $(date)"
+
+          # 使用增量構建，不清除之前的構建
+          xcodebuild -workspace PetProject.xcworkspace \
+                     -scheme AwesomeProject \
+                     -configuration Debug \
+                     -destination 'generic/platform=iOS Simulator' \
+                     -derivedDataPath build \
+                     -allowProvisioningUpdates \
+                     build # 移除 clean 以加速
+
+          echo "⏱️ 結束時間: $(date)"
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ios-debug-build
+          path: ios/build/Build/Products/Debug-iphonesimulator/
+          retention-days: 7
+
+      - name: Build summary
+        run: |
+          echo "🎉 iOS Debug 構建完成！"
+          echo "📱 構建類型: Debug (快速模式)"
+          echo "🔧 構建環境: macOS ${{ runner.os }}"
+          echo "📅 構建時間: $(date)"
+          echo "🚀 分支: ${{ github.ref_name }}"
+          echo "👤 觸發者: ${{ github.actor }}"
+          echo "⚡ 優化策略:"
+          echo "  - 只構建 Debug 版本"
+          echo "  - 使用增量構建"
+          echo "  - 優化依賴緩存"
+          echo "  - 並行安裝依賴"
+
+      - name: Build failure notification
+        if: failure()
+        run: |
+          echo "❌ iOS 構建失敗！"
+          echo "🔍 請檢查以下可能的原因："
+          echo "1. CocoaPods 依賴問題"
+          echo "2. iOS 專案配置錯誤"
+          echo "3. 缺少必要的 iOS 依賴"
+          echo "4. Xcode 版本兼容性問題"
