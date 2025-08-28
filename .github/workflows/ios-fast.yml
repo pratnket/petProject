@@ -95,14 +95,18 @@ jobs:
 
           # 使用增量構建，不清除之前的構建
           echo "🔨 開始構建..."
-          xcodebuild -workspace PetProject.xcworkspace \
-                     -scheme AwesomeProject \
-                     -configuration Debug \
-                     -destination 'generic/platform=iOS Simulator' \
-                     -derivedDataPath build \
-                     -allowProvisioningUpdates \
-                     build || {
-            echo "❌ 構建失敗，嘗試使用 project 文件："
+
+          # 嘗試使用 workspace 構建
+          if xcodebuild -workspace PetProject.xcworkspace \
+                        -scheme AwesomeProject \
+                        -configuration Debug \
+                        -destination 'generic/platform=iOS Simulator' \
+                        -derivedDataPath build \
+                        -allowProvisioningUpdates \
+                        build; then
+            echo "✅ 使用 workspace 構建成功！"
+          else
+            echo "❌ workspace 構建失敗，嘗試使用 project 文件："
             xcodebuild -project PetProject.xcodeproj \
                        -scheme AwesomeProject \
                        -configuration Debug \
@@ -110,7 +114,7 @@ jobs:
                        -derivedDataPath build \
                        -allowProvisioningUpdates \
                        build
-          }
+          fi
 
           echo "⏱️ 結束時間: $(date)"
 
