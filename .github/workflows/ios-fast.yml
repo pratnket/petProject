@@ -77,6 +77,16 @@ jobs:
           echo "🔍 從 project 列出 schemes："
           xcodebuild -project PetProject.xcodeproj -list || echo "❌ project 命令失敗"
 
+          # 檢查是否有 Podfile.lock
+          echo "📱 檢查 Podfile.lock："
+          ls -la Podfile.lock || echo "❌ 找不到 Podfile.lock"
+
+          # 如果沒有 Podfile.lock，運行 pod install
+          if [ ! -f "Podfile.lock" ]; then
+            echo "📦 運行 pod install..."
+            pod install
+          fi
+
       - name: Build iOS app (Debug only)
         run: |
           cd ios
@@ -90,15 +100,26 @@ jobs:
           # 使用增量構建，不清除之前的構建
           echo "🔨 開始構建..."
 
-          # 直接使用 project 文件構建
-          echo "🔨 使用 project 文件構建..."
-          xcodebuild -project PetProject.xcodeproj \
-                     -scheme AwesomeProject \
-                     -configuration Debug \
-                     -destination 'generic/platform=iOS Simulator' \
-                     -derivedDataPath build \
-                     -allowProvisioningUpdates \
-                     build
+          # 檢查是否有 workspace 文件
+          if [ -f "PetProject.xcworkspace" ]; then
+            echo "🔨 使用 workspace 文件構建..."
+            xcodebuild -workspace PetProject.xcworkspace \
+                       -scheme PetProject \
+                       -configuration Debug \
+                       -destination 'generic/platform=iOS Simulator' \
+                       -derivedDataPath build \
+                       -allowProvisioningUpdates \
+                       build
+          else
+            echo "🔨 使用 project 文件構建..."
+            xcodebuild -project PetProject.xcodeproj \
+                       -scheme PetProject \
+                       -configuration Debug \
+                       -destination 'generic/platform=iOS Simulator' \
+                       -derivedDataPath build \
+                       -allowProvisioningUpdates \
+                       build
+          fi
 
           echo "⏱️ 結束時間: $(date)"
 
