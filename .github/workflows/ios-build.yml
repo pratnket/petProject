@@ -41,7 +41,16 @@ jobs:
         run: |
           cd ios
           echo "🔍 檢查可用的 Xcode schemes："
+          echo "📁 當前目錄："
+          pwd
+          echo "📱 檢查 workspace 文件："
+          ls -la *.xcworkspace
+          echo "🔍 列出所有 schemes："
           xcodebuild -workspace PetProject.xcworkspace -list
+          echo "📋 檢查 project 文件："
+          ls -la *.xcodeproj
+          echo "🔍 從 project 文件列出 schemes："
+          xcodebuild -project PetProject.xcodeproj -list
 
       - name: Build iOS app
         run: |
