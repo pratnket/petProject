@@ -3,9 +3,21 @@ name: Android Build
 on:
   push:
     branches: [master, develop]
+    paths:
+      - 'android/**'
+      - 'src/**'
+      - 'package.json'
+      - 'yarn.lock'
+      - '.github/workflows/android-build.yml'
   pull_request:
     branches: [master, develop]
-  workflow_dispatch:
+    paths:
+      - 'android/**'
+      - 'src/**'
+      - 'package.json'
+      - 'yarn.lock'
+      - '.github/workflows/android-build.yml'
+  workflow_dispatch: # 允許手動觸發
 
 jobs:
   android-build:
@@ -24,23 +36,25 @@ jobs:
       - name: Setup Java
         uses: actions/setup-java@v4
         with:
-          distribution: 'zulu'
+          distribution: 'temurin'
           java-version: '17'
 
       - name: Install dependencies
         run: |
           yarn install --frozen-lockfile
 
-      - name: Setup Android environment
-        uses: android-actions/setup-android@v2
-        with:
-          sdk-platform: '34'
-          sdk-build-tools: '34.0.0'
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v0
 
       - name: Build Android app
         run: |
           cd android
+          echo "🔨 開始構建 Android 版本..."
+          echo "⏱️ 開始時間: $(date)"
+
           ./gradlew assembleRelease
+
+          echo "⏱️ 結束時間: $(date)"
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
@@ -49,9 +63,9 @@ jobs:
           path: android/app/build/outputs/apk/release/
           retention-days: 7
 
-      - name: Build summary
+      - name: Build status
         run: |
-          echo "🤖 Android 構建完成！"
+          echo "✅ Android 構建完成！"
           echo "📱 構建時間: $(date)"
           echo "🔧 構建環境: Ubuntu ${{ runner.os }}"
-          echo "🚀 分支: ${{ github.ref_name }}"
+          echo "⚡ 優化策略: 只在 Android 相關文件變更時觸發"
