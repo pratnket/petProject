@@ -1,0 +1,52 @@
+name: iOS Minimal Test - 最簡單測試
+
+on:
+  workflow_dispatch: # 只允許手動觸發
+
+jobs:
+  ios-minimal-test:
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Check iOS project structure
+        run: |
+          echo "🔍 === 檢查 iOS 專案結構 ==="
+          echo "📁 當前目錄："
+          pwd
+          echo ""
+
+          echo "📱 iOS 目錄內容："
+          ls -la ios/
+          echo ""
+
+          echo "📋 Podfile 內容："
+          cat ios/Podfile
+          echo ""
+
+      - name: Test basic xcodebuild command
+        run: |
+          cd ios
+          echo "🔨 === 測試基本 xcodebuild 命令 ==="
+
+          echo "📱 測試 -list 命令："
+          xcodebuild -project PetProject.xcodeproj -list
+          echo ""
+
+          echo "📋 測試 -showBuildSettings 命令："
+          xcodebuild -project PetProject.xcodeproj -showBuildSettings | head -20
+          echo ""
+
+      - name: Test minimal build
+        run: |
+          cd ios
+          echo "🔨 === 測試最簡單構建 ==="
+
+          echo "📱 嘗試最簡單的構建命令..."
+          xcodebuild -project PetProject.xcodeproj \
+                     -scheme PetProject \
+                     -configuration Debug \
+                     -destination 'generic/platform=iOS Simulator' \
+                     build

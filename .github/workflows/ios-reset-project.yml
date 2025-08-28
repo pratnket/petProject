@@ -1,0 +1,93 @@
+name: iOS Reset Project - 重置專案
+
+on:
+  workflow_dispatch: # 只允許手動觸發
+
+jobs:
+  ios-reset-project:
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Backup current iOS project
+        run: |
+          echo "💾 === 備份當前 iOS 專案 ==="
+          cp -r ios ios_backup_$(date +%Y%m%d_%H%M%S)
+          echo "✅ 備份完成"
+
+      - name: Remove current iOS project
+        run: |
+          echo "🗑️ === 移除當前 iOS 專案 ==="
+          rm -rf ios
+          echo "✅ iOS 目錄已移除"
+
+      - name: Generate new iOS project
+        run: |
+          echo "🔄 === 生成新的 iOS 專案 ==="
+
+          # 使用 React Native CLI 重新生成
+          npx @react-native-community/cli init TempProject --skip-install
+
+          # 移動新生成的 iOS 目錄
+          mv TempProject/ios ios
+
+          # 清理臨時目錄
+          rm -rf TempProject
+
+          echo "✅ 新 iOS 專案已生成"
+
+      - name: Verify new iOS project
+        run: |
+          echo "🔍 === 驗證新 iOS 專案 ==="
+
+          echo "📱 iOS 目錄內容："
+          ls -la ios/
+          echo ""
+
+          echo "📋 Podfile 內容："
+          cat ios/Podfile
+          echo ""
+
+      - name: Install dependencies
+        run: |
+          echo "📦 === 安裝依賴 ==="
+
+          # 安裝 Node.js 依賴
+          yarn install --frozen-lockfile
+
+          # 安裝 iOS 依賴
+          cd ios
+          pod install
+
+      - name: Test new project build
+        run: |
+          cd ios
+          echo "🔨 === 測試新專案構建 ==="
+
+          # 測試構建
+          xcodebuild -project PetProject.xcodeproj \
+                     -scheme PetProject \
+                     -configuration Debug \
+                     -destination 'generic/platform=iOS Simulator' \
+                     build
+
+      - name: Success notification
+        if: success()
+        run: |
+          echo "🎉 iOS 專案重置成功！"
+          echo "✅ 新專案構建成功"
+          echo "💡 問題已解決"
+
+      - name: Failure notification
+        if: failure()
+        run: |
+          echo "❌ 新專案仍然失敗"
+          echo "🔍 需要進一步分析"
+          echo "💡 可能是 React Native 版本問題"
