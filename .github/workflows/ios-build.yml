@@ -56,7 +56,7 @@ jobs:
         run: |
           cd ios
           xcodebuild -workspace PetProject.xcworkspace \
-                     -scheme PetProject \
+                                           -scheme AwesomeProject \
                      -configuration Release \
                      -destination 'generic/platform=iOS' \
                      -derivedDataPath build \
