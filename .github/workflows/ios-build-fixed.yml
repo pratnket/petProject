@@ -1,0 +1,120 @@
+name: iOS Build - 修復版本
+
+on:
+  push:
+    branches: [master, develop]
+    paths-ignore:
+      - 'android/**'
+      - '.github/workflows/android-build.yml'
+  pull_request:
+    branches: [master, develop]
+    paths-ignore:
+      - 'android/**'
+      - '.github/workflows/android-build.yml'
+  workflow_dispatch: # 允許手動觸發
+
+jobs:
+  ios-build:
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'yarn'
+
+      - name: Setup Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.0'
+          bundler-cache: true
+
+      - name: Cache dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            node_modules
+            ios/Pods
+          key: ${{ runner.os }}-deps-${{ hashFiles('**/yarn.lock', '**/ios/Podfile.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-deps-
+
+      - name: Install dependencies
+        run: |
+          echo "📦 安裝依賴..."
+          yarn install --frozen-lockfile
+
+          echo "📱 安裝 iOS 依賴..."
+          cd ios
+          pod install --repo-update
+
+      - name: List available schemes
+        run: |
+          cd ios
+          echo "🔍 檢查可用的 schemes..."
+
+          if [ -f "PetProject.xcworkspace" ]; then
+            echo "📱 從 Workspace 列出 schemes："
+            xcodebuild -workspace PetProject.xcworkspace -list
+          else
+            echo "📋 從 Project 列出 schemes："
+            xcodebuild -project PetProject.xcodeproj -list
+          fi
+
+      - name: Build iOS app
+        run: |
+          cd ios
+          echo "🔨 開始構建 iOS 應用..."
+
+          # 檢查是否有 workspace 文件
+          if [ -f "PetProject.xcworkspace" ]; then
+            echo "✅ 使用 Workspace 構建"
+            xcodebuild -workspace PetProject.xcworkspace \
+                       -scheme PetProject \
+                       -configuration Debug \
+                       -destination 'generic/platform=iOS Simulator' \
+                       -derivedDataPath build \
+                       -allowProvisioningUpdates \
+                       build
+          else
+            echo "✅ 使用 Project 構建"
+            xcodebuild -project PetProject.xcodeproj \
+                       -scheme PetProject \
+                       -configuration Debug \
+                       -destination 'generic/platform=iOS Simulator' \
+                       -derivedDataPath build \
+                       -allowProvisioningUpdates \
+                       build
+          fi
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        if: success()
+        with:
+          name: ios-build
+          path: ios/build/
+          retention-days: 1
+
+      - name: Build success notification
+        if: success()
+        run: |
+          echo "🎉 iOS 構建成功！"
+          echo "✅ 構建完成時間: $(date)"
+
+      - name: Build failure notification
+        if: failure()
+        run: |
+          echo "❌ iOS 構建失敗！"
+          echo "🔍 請檢查以下可能的原因："
+          echo "1. CocoaPods 依賴問題"
+          echo "2. iOS 專案配置錯誤"
+          echo "3. 缺少必要的 iOS 依賴"
+          echo "4. Xcode 版本兼容性問題"
+          echo "5. Scheme 名稱不匹配"
+          echo ""
+          echo "📋 構建失敗時間: $(date)"
+          echo "💡 建議：檢查診斷工作流程的輸出"
