@@ -1,0 +1,128 @@
+name: iOS Debug - 診斷構建問題
+
+on:
+  workflow_dispatch: # 只允許手動觸發
+
+jobs:
+  ios-debug:
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Setup Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.0'
+          bundler-cache: true
+
+      - name: Install dependencies
+        run: |
+          yarn install --frozen-lockfile
+
+      - name: Debug iOS environment
+        run: |
+          cd ios
+          echo "🔍 === iOS 環境診斷 ==="
+          echo "📁 當前目錄："
+          pwd
+          echo ""
+
+          echo "📱 === 專案文件檢查 ==="
+          echo "所有文件："
+          ls -la
+          echo ""
+
+          echo "📋 === Xcode 專案檢查 ==="
+          echo "Project 文件："
+          ls -la *.xcodeproj
+          echo ""
+
+          echo "Workspace 文件："
+          ls -la *.xcworkspace || echo "❌ 沒有 workspace 文件"
+          echo ""
+
+          echo "📦 === CocoaPods 檢查 ==="
+          echo "Podfile："
+          cat Podfile
+          echo ""
+
+          echo "Podfile.lock："
+          ls -la Podfile.lock || echo "❌ 沒有 Podfile.lock"
+          echo ""
+
+          echo "Pods 目錄："
+          ls -la Pods/ || echo "❌ 沒有 Pods 目錄"
+          echo ""
+
+      - name: Install CocoaPods dependencies
+        run: |
+          cd ios
+          echo "📦 === 安裝 CocoaPods 依賴 ==="
+          pod install --verbose
+          echo ""
+
+          echo "📱 === 安裝後檢查 ==="
+          echo "Workspace 文件："
+          ls -la *.xcworkspace || echo "❌ 仍然沒有 workspace 文件"
+          echo ""
+
+          echo "Pods 目錄："
+          ls -la Pods/ || echo "❌ 仍然沒有 Pods 目錄"
+          echo ""
+
+      - name: List all available schemes
+        run: |
+          cd ios
+          echo "🔍 === 列出所有可用的 Schemes ==="
+
+          if [ -f "PetProject.xcworkspace" ]; then
+            echo "📱 從 Workspace 列出 schemes："
+            xcodebuild -workspace PetProject.xcworkspace -list
+          else
+            echo "❌ 沒有 workspace 文件"
+          fi
+
+          echo ""
+          echo "📋 從 Project 列出 schemes："
+          xcodebuild -project PetProject.xcodeproj -list
+          echo ""
+
+      - name: Test build with different schemes
+        run: |
+          cd ios
+          echo "🔨 === 測試不同 Scheme 的構建 ==="
+
+          # 獲取所有可用的 schemes
+          SCHEMES=$(xcodebuild -project PetProject.xcodeproj -list | grep "Schemes:" -A 100 | grep -v "Schemes:" | grep -v "^$" | tr -d ' ')
+
+          echo "找到的 schemes: $SCHEMES"
+          echo ""
+
+          # 測試每個 scheme
+          for scheme in $SCHEMES; do
+            echo "🔍 測試 scheme: $scheme"
+            xcodebuild -project PetProject.xcodeproj \
+                       -scheme "$scheme" \
+                       -configuration Debug \
+                       -destination 'generic/platform=iOS Simulator' \
+                       -derivedDataPath build \
+                       -allowProvisioningUpdates \
+                       build -quiet || echo "❌ scheme $scheme 構建失敗"
+            echo ""
+          done
+
+      - name: Build summary
+        run: |
+          echo "🎯 === 診斷完成 ==="
+          echo "請檢查上面的輸出，找出具體問題："
+          echo "1. 是否有 workspace 文件"
+          echo "2. 可用的 scheme 名稱"
+          echo "3. 哪個 scheme 構建失敗"
+          echo "4. 具體的錯誤信息"
