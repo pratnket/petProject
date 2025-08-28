@@ -37,6 +37,12 @@ jobs:
           sudo gem install cocoapods
           pod install
 
+      - name: List available schemes
+        run: |
+          cd ios
+          echo "🔍 檢查可用的 Xcode schemes："
+          xcodebuild -workspace PetProject.xcworkspace -list
+
       - name: Build iOS app
         run: |
           cd ios

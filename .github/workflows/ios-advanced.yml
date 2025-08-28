@@ -54,6 +54,12 @@ jobs:
           echo "📱 Podfile 內容："
           cat Podfile
 
+      - name: List available schemes
+        run: |
+          cd ios
+          echo "🔍 檢查可用的 Xcode schemes："
+          xcodebuild -workspace PetProject.xcworkspace -list
+
       - name: Build iOS app (Debug)
         if: github.event.inputs.build_type == 'debug' || github.event_name != 'workflow_dispatch'
         run: |
