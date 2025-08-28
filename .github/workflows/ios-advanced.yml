@@ -75,7 +75,7 @@ jobs:
           cd ios
           echo "🔨 開始構建 Debug 版本..."
           xcodebuild -workspace PetProject.xcworkspace \
-                     -scheme AwesomeProject \
+                     -scheme PetProject \
                      -configuration Debug \
                      -destination 'generic/platform=iOS Simulator' \
                      -derivedDataPath build \
@@ -88,7 +88,7 @@ jobs:
           cd ios
           echo "🔨 開始構建 Release 版本..."
           xcodebuild -workspace PetProject.xcworkspace \
-                     -scheme AwesomeProject \
+                     -scheme PetProject \
                      -configuration Release \
                      -destination 'generic/platform=iOS Simulator' \
                      -derivedDataPath build \
