@@ -1,4 +1,4 @@
-name: iOS Build - 修復版本
+name: iOS Build - 無簽名測試版本
 
 on:
   push:
@@ -14,7 +14,7 @@ on:
   workflow_dispatch: # 允許手動觸發
 
 jobs:
-  ios-build:
+  ios-build-unsigned:
     runs-on: macos-latest
 
     steps:
@@ -45,17 +45,48 @@ jobs:
 
       - name: Install dependencies
         run: |
-          echo "📦 安裝依賴..."
+          echo "📦 安裝 Node.js 依賴..."
           yarn install --frozen-lockfile
 
           echo "📱 安裝 iOS 依賴..."
           cd ios
-          pod install --repo-update
+          echo "🔍 檢查 CocoaPods 環境..."
+          pod --version
+          echo ""
+
+          echo "📦 安裝 CocoaPods 依賴..."
+          pod install --verbose --repo-update
+          echo ""
+
+          echo "📋 檢查安裝結果..."
+          ls -la
+          echo ""
+
+      - name: Verify iOS project structure
+        run: |
+          cd ios
+          echo "🔍 === iOS 專案結構驗證 ==="
+
+          echo "📱 Project 文件："
+          ls -la *.xcodeproj
+          echo ""
+
+          echo "📦 Workspace 文件："
+          ls -la *.xcworkspace || echo "❌ 沒有 workspace 文件"
+          echo ""
+
+          echo "📋 Pods 目錄："
+          ls -la Pods/ || echo "❌ 沒有 Pods 目錄"
+          echo ""
+
+          echo "🔒 Podfile.lock："
+          ls -la Podfile.lock || echo "❌ 沒有 Podfile.lock"
+          echo ""
 
       - name: List available schemes
         run: |
           cd ios
-          echo "🔍 檢查可用的 schemes..."
+          echo "🔍 === 列出可用的 Schemes ==="
 
           if [ -f "PetProject.xcworkspace" ]; then
             echo "📱 從 Workspace 列出 schemes："
@@ -64,13 +95,14 @@ jobs:
             echo "📋 從 Project 列出 schemes："
             xcodebuild -project PetProject.xcodeproj -list
           fi
+          echo ""
 
-      - name: Build iOS app
+      - name: Build iOS app (無簽名模式)
         run: |
           cd ios
-          echo "🔨 開始構建 iOS 應用..."
+          echo "🔨 === 開始無簽名 iOS 構建 ==="
 
-          # 檢查是否有 workspace 文件
+          # 構建命令（無簽名模式）
           if [ -f "PetProject.xcworkspace" ]; then
             echo "✅ 使用 Workspace 構建（無簽名模式）"
             xcodebuild -workspace PetProject.xcworkspace \
@@ -97,32 +129,50 @@ jobs:
                        build
           fi
 
+      - name: Check build output
+        run: |
+          cd ios
+          echo "📋 === 檢查構建輸出 ==="
+
+          if [ -d "build" ]; then
+            echo "✅ 構建目錄存在"
+            ls -la build/
+          else
+            echo "❌ 構建目錄不存在"
+          fi
+          echo ""
+
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         if: success()
         with:
-          name: ios-build
+          name: ios-build-unsigned
           path: ios/build/
           retention-days: 1
 
       - name: Build success notification
         if: success()
         run: |
-          echo "🎉 iOS 構建成功！"
+          echo "🎉 iOS 無簽名構建成功！"
           echo "✅ 構建完成時間: $(date)"
-          echo "💡 注意：這是無簽名版本，僅用於測試構建"
+          echo "💡 重要說明："
+          echo "   - 這是無簽名版本，僅用於測試構建"
+          echo "   - 不能安裝到真機"
+          echo "   - 不能分發到 App Store"
+          echo "   - 但可以驗證專案配置和依賴"
 
       - name: Build failure notification
         if: failure()
         run: |
-          echo "❌ iOS 構建失敗！"
-          echo "🔍 請檢查以下可能的原因："
-          echo "1. CocoaPods 依賴問題"
-          echo "2. iOS 專案配置錯誤"
-          echo "3. 缺少必要的 iOS 依賴"
-          echo "4. Xcode 版本兼容性問題"
-          echo "5. Scheme 名稱不匹配"
-          echo "6. 編譯錯誤"
+          echo "❌ iOS 無簽名構建失敗！"
+          echo "🔍 失敗原因分析："
+          echo "1. 依賴問題：CocoaPods 依賴未正確安裝"
+          echo "2. 配置問題：專案配置錯誤"
+          echo "3. 編譯問題：原生模組編譯失敗"
+          echo "4. Scheme 問題：scheme 名稱不匹配"
           echo ""
           echo "📋 構建失敗時間: $(date)"
-          echo "💡 建議：檢查診斷工作流程的輸出"
+          echo "💡 建議："
+          echo "   - 檢查 CocoaPods 依賴安裝"
+          echo "   - 確認專案配置正確"
+          echo "   - 查看詳細構建日誌"
