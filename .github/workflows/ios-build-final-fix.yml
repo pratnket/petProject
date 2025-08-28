@@ -1,0 +1,77 @@
+name: iOS Build - 最終修復版本
+
+on:
+  workflow_dispatch: # 只允許手動觸發
+
+jobs:
+  ios-build-final-fix:
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Setup Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.0'
+
+      - name: Install dependencies
+        run: |
+          echo "📦 === 安裝依賴 ==="
+
+          # 安裝 Node.js 依賴
+          yarn install --frozen-lockfile
+
+          # 安裝 iOS 依賴
+          cd ios
+          pod install
+
+      - name: List available simulators
+        run: |
+          echo "📱 === 列出可用的模擬器 ==="
+
+          # 列出可用的 iOS 模擬器
+          xcrun simctl list devices available
+          echo ""
+
+      - name: List available destinations
+        run: |
+          cd ios
+          echo "🎯 === 列出可用的構建目標 ==="
+
+          # 列出可用的構建目標
+          xcodebuild -project PetProject.xcodeproj -showdestinations -scheme PetProject
+          echo ""
+
+      - name: Build iOS app (使用可用目標)
+        run: |
+          cd ios
+          echo "🔨 === 開始 iOS 構建（使用可用目標）==="
+
+          # 使用更通用的目標，避免版本問題
+          xcodebuild -project PetProject.xcodeproj \
+                     -scheme PetProject \
+                     -configuration Debug \
+                     -destination 'generic/platform=iOS' \
+                     -derivedDataPath build \
+                     build
+
+      - name: Success notification
+        if: success()
+        run: |
+          echo "🎉 iOS 構建成功！"
+          echo "✅ 模擬器版本問題已解決"
+          echo "💡 使用通用 iOS 平台目標"
+
+      - name: Failure notification
+        if: failure()
+        run: |
+          echo "❌ iOS 構建仍然失敗"
+          echo "🔍 需要進一步分析"
+          echo "💡 請檢查構建日誌"
