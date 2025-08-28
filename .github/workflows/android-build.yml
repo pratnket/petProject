@@ -43,6 +43,15 @@ jobs:
         run: |
           yarn install --frozen-lockfile
 
+      - name: Check Android project structure
+        run: |
+          echo "📁 檢查 Android 專案結構："
+          ls -la android/
+          echo "📱 檢查 gradlew 文件："
+          ls -la android/gradlew
+          echo "📋 檢查 build.gradle 文件："
+          ls -la android/build.gradle
+
       - name: Setup Android SDK
         uses: android-actions/setup-android@v2
 
@@ -52,6 +61,13 @@ jobs:
           echo "🔨 開始構建 Android 版本..."
           echo "⏱️ 開始時間: $(date)"
 
+          # 給 gradlew 腳本執行權限
+          chmod +x ./gradlew
+
+          # 檢查 gradlew 是否存在
+          ls -la gradlew
+
+          # 執行構建
           ./gradlew assembleRelease
 
           echo "⏱️ 結束時間: $(date)"
