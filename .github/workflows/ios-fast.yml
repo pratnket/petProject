@@ -74,6 +74,8 @@ jobs:
           pwd
           echo "📱 檢查 project 文件："
           ls -la *.xcodeproj || echo "❌ 找不到 project 文件"
+
+          # 先嘗試列出 schemes
           echo "🔍 從 project 列出 schemes："
           xcodebuild -project PetProject.xcodeproj -list || echo "❌ project 命令失敗"
 
@@ -85,6 +87,19 @@ jobs:
           if [ ! -f "Podfile.lock" ]; then
             echo "📦 運行 pod install..."
             pod install
+            
+            # 安裝完成後再次檢查 schemes
+            echo "🔍 安裝 CocoaPods 後再次檢查 schemes："
+            xcodebuild -project PetProject.xcodeproj -list || echo "❌ project 命令失敗"
+          fi
+
+          # 檢查是否有 workspace 文件
+          echo "📱 檢查 workspace 文件："
+          ls -la *.xcworkspace || echo "❌ 找不到 workspace 文件"
+
+          if [ -f "PetProject.xcworkspace" ]; then
+            echo "🔍 從 workspace 列出 schemes："
+            xcodebuild -workspace PetProject.xcworkspace -list || echo "❌ workspace 命令失敗"
           fi
 
       - name: Build iOS app (Debug only)
