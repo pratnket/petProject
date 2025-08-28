@@ -1,0 +1,56 @@
+name: iOS Simple Test - 基本構建測試
+
+on:
+  workflow_dispatch: # 只允許手動觸發
+
+jobs:
+  ios-simple-test:
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Setup Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.0'
+
+      - name: Install dependencies
+        run: |
+          echo "📦 安裝依賴..."
+          yarn install --frozen-lockfile
+
+          echo "📱 安裝 iOS 依賴..."
+          cd ios
+          pod install
+
+      - name: Test basic build
+        run: |
+          cd ios
+          echo "🔨 測試基本構建..."
+
+          # 簡單的構建測試
+          xcodebuild -project PetProject.xcodeproj \
+                     -scheme PetProject \
+                     -configuration Debug \
+                     -destination 'generic/platform=iOS Simulator' \
+                     -derivedDataPath build \
+                     build
+
+      - name: Success notification
+        if: success()
+        run: |
+          echo "🎉 基本構建測試成功！"
+          echo "✅ 專案配置正確"
+
+      - name: Failure notification
+        if: failure()
+        run: |
+          echo "❌ 基本構建測試失敗"
+          echo "🔍 需要檢查專案配置"

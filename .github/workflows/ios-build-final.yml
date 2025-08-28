@@ -1,0 +1,195 @@
+name: iOS Build - 最終修復版本
+
+on:
+  push:
+    branches: [master, develop]
+    paths-ignore:
+      - 'android/**'
+      - '.github/workflows/android-build.yml'
+  pull_request:
+    branches: [master, develop]
+    paths-ignore:
+      - 'android/**'
+      - '.github/workflows/android-build.yml'
+  workflow_dispatch: # 允許手動觸發
+
+jobs:
+  ios-build-final:
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'yarn'
+
+      - name: Setup Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.0'
+          bundler-cache: true
+
+      - name: Cache dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            node_modules
+            ios/Pods
+          key: ${{ runner.os }}-deps-${{ hashFiles('**/yarn.lock', '**/ios/Podfile.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-deps-
+
+      - name: Install Node.js dependencies
+        run: |
+          echo "📦 安裝 Node.js 依賴..."
+          yarn install --frozen-lockfile
+
+      - name: Setup iOS build environment
+        run: |
+          cd ios
+          echo "🔧 === 設置 iOS 構建環境 ==="
+
+          # 檢查 CocoaPods 環境
+          echo "📱 CocoaPods 版本："
+          pod --version
+          echo ""
+
+          # 清理舊的依賴
+          echo "🧹 清理舊的依賴..."
+          rm -rf Pods/
+          rm -rf Podfile.lock
+          rm -rf *.xcworkspace
+          echo "✅ 清理完成"
+          echo ""
+
+      - name: Install CocoaPods dependencies
+        run: |
+          cd ios
+          echo "📦 === 安裝 CocoaPods 依賴 ==="
+
+          # 安裝依賴
+          echo "🔧 安裝依賴..."
+          pod install --verbose --repo-update
+          echo ""
+
+          # 檢查安裝結果
+          echo "📋 檢查安裝結果..."
+          ls -la
+          echo ""
+
+      - name: Verify iOS project structure
+        run: |
+          cd ios
+          echo "🔍 === iOS 專案結構驗證 ==="
+
+          echo "📱 Project 文件："
+          ls -la *.xcodeproj
+          echo ""
+
+          echo "📦 Workspace 文件："
+          ls -la *.xcworkspace || echo "❌ 沒有 workspace 文件"
+          echo ""
+
+          echo "📋 Pods 目錄："
+          ls -la Pods/ || echo "❌ 沒有 Pods 目錄"
+          echo ""
+
+          echo "🔒 Podfile.lock："
+          ls -la Podfile.lock || echo "❌ 沒有 Podfile.lock"
+          echo ""
+
+      - name: List available schemes
+        run: |
+          cd ios
+          echo "🔍 === 列出可用的 Schemes ==="
+
+          if [ -f "PetProject.xcworkspace" ]; then
+            echo "📱 從 Workspace 列出 schemes："
+            xcodebuild -workspace PetProject.xcworkspace -list
+          else
+            echo "📋 從 Project 列出 schemes："
+            xcodebuild -project PetProject.xcodeproj -list
+          fi
+          echo ""
+
+      - name: Build iOS app (最終修復版本)
+        run: |
+          cd ios
+          echo "🔨 === 開始 iOS 構建（最終修復版本）==="
+
+          # 構建命令（使用最佳配置）
+          if [ -f "PetProject.xcworkspace" ]; then
+            echo "✅ 使用 Workspace 構建"
+            xcodebuild -workspace PetProject.xcworkspace \
+                       -scheme PetProject \
+                       -configuration Debug \
+                       -destination 'generic/platform=iOS Simulator' \
+                       -derivedDataPath build \
+                       -allowProvisioningUpdates \
+                       CODE_SIGN_IDENTITY="" \
+                       CODE_SIGNING_REQUIRED=NO \
+                       CODE_SIGNING_ALLOWED=NO \
+                       ONLY_ACTIVE_ARCH=YES \
+                       build
+          else
+            echo "✅ 使用 Project 構建"
+            xcodebuild -project PetProject.xcodeproj \
+                       -scheme PetProject \
+                       -configuration Debug \
+                       -destination 'generic/platform=iOS Simulator' \
+                       -derivedDataPath build \
+                       -allowProvisioningUpdates \
+                       CODE_SIGN_IDENTITY="" \
+                       CODE_SIGNING_REQUIRED=NO \
+                       CODE_SIGNING_ALLOWED=NO \
+                       ONLY_ACTIVE_ARCH=YES \
+                       build
+          fi
+
+      - name: Check build output
+        run: |
+          cd ios
+          echo "📋 === 檢查構建輸出 ==="
+
+          if [ -d "build" ]; then
+            echo "✅ 構建目錄存在"
+            ls -la build/
+          else
+            echo "❌ 構建目錄不存在"
+          fi
+          echo ""
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        if: success()
+        with:
+          name: ios-build-final
+          path: ios/build/
+          retention-days: 1
+
+      - name: Build success notification
+        if: success()
+        run: |
+          echo "🎉 iOS 構建成功！"
+          echo "✅ 構建完成時間: $(date)"
+          echo "💡 修復完成："
+          echo "   - 解決了 exit code 65 問題"
+          echo "   - 正確安裝了 CocoaPods 依賴"
+          echo "   - 生成了可用的構建版本"
+
+      - name: Build failure notification
+        if: failure()
+        run: |
+          echo "❌ iOS 構建仍然失敗！"
+          echo "🔍 需要進一步診斷："
+          echo "1. 檢查 CocoaPods 依賴安裝"
+          echo "2. 檢查專案配置"
+          echo "3. 檢查 React Native 版本兼容性"
+          echo "4. 檢查原生模組配置"
+          echo ""
+          echo "📋 構建失敗時間: $(date)"
+          echo "💡 建議：使用診斷工作流程深入分析"
