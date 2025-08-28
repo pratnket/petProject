@@ -6,7 +6,6 @@ on:
     branches: [master, develop]
     paths-ignore:
       - 'android/**'
-      - 'android/**'
       - '.github/workflows/android-build.yml'
   pull_request:
     branches: [master, develop]
@@ -97,15 +96,14 @@ jobs:
           echo "🔨 開始構建..."
 
           # 嘗試使用 workspace 構建
-          if xcodebuild -workspace PetProject.xcworkspace \
-                        -scheme AwesomeProject \
-                        -configuration Debug \
-                        -destination 'generic/platform=iOS Simulator' \
-                        -derivedDataPath build \
-                        -allowProvisioningUpdates \
-                        build; then
-            echo "✅ 使用 workspace 構建成功！"
-          else
+          echo "🔨 嘗試使用 workspace 構建..."
+          xcodebuild -workspace PetProject.xcworkspace \
+                     -scheme AwesomeProject \
+                     -configuration Debug \
+                     -destination 'generic/platform=iOS Simulator' \
+                     -derivedDataPath build \
+                     -allowProvisioningUpdates \
+                     build || {
             echo "❌ workspace 構建失敗，嘗試使用 project 文件："
             xcodebuild -project PetProject.xcodeproj \
                        -scheme AwesomeProject \
@@ -114,7 +112,7 @@ jobs:
                        -derivedDataPath build \
                        -allowProvisioningUpdates \
                        build
-          fi
+          }
 
           echo "⏱️ 結束時間: $(date)"
 
