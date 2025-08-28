@@ -1,0 +1,180 @@
+name: iOS Debug - 詳細診斷 exit code 65
+
+on:
+  workflow_dispatch: # 只允許手動觸發
+
+jobs:
+  ios-debug-detailed:
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Setup Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.0'
+          bundler-cache: true
+
+      - name: Install dependencies
+        run: |
+          echo "📦 安裝 Node.js 依賴..."
+          yarn install --frozen-lockfile
+
+      - name: Debug iOS environment - 詳細檢查
+        run: |
+          cd ios
+          echo "🔍 === iOS 環境詳細診斷 ==="
+          echo "📁 當前目錄："
+          pwd
+          echo ""
+
+          echo "📱 === 專案文件檢查 ==="
+          echo "所有文件："
+          ls -la
+          echo ""
+
+          echo "📋 === Xcode 專案檢查 ==="
+          echo "Project 文件："
+          ls -la *.xcodeproj
+          echo ""
+
+          echo "Workspace 文件："
+          ls -la *.xcworkspace || echo "❌ 沒有 workspace 文件"
+          echo ""
+
+          echo "📦 === CocoaPods 檢查 ==="
+          echo "Podfile："
+          cat Podfile
+          echo ""
+
+          echo "Podfile.lock："
+          ls -la Podfile.lock || echo "❌ 沒有 Podfile.lock"
+          echo ""
+
+          echo "Pods 目錄："
+          ls -la Pods/ || echo "❌ 沒有 Pods 目錄"
+          echo ""
+
+      - name: Install CocoaPods dependencies - 詳細安裝
+        run: |
+          cd ios
+          echo "📦 === 安裝 CocoaPods 依賴 ==="
+          echo "檢查 CocoaPods 版本："
+          pod --version
+          echo ""
+
+          echo "清理 CocoaPods 緩存："
+          pod cache clean --all || echo "緩存清理完成"
+          echo ""
+
+          echo "安裝依賴（詳細模式）："
+          pod install --verbose --repo-update
+          echo ""
+
+          echo "📱 === 安裝後檢查 ==="
+          echo "Workspace 文件："
+          ls -la *.xcworkspace || echo "❌ 仍然沒有 workspace 文件"
+          echo ""
+
+          echo "Pods 目錄："
+          ls -la Pods/ || echo "❌ 仍然沒有 Pods 目錄"
+          echo ""
+
+      - name: List all available schemes - 詳細列出
+        run: |
+          cd ios
+          echo "🔍 === 列出所有可用的 Schemes ==="
+
+          if [ -f "PetProject.xcworkspace" ]; then
+            echo "📱 從 Workspace 列出 schemes："
+            xcodebuild -workspace PetProject.xcworkspace -list
+          else
+            echo "❌ 沒有 workspace 文件"
+          fi
+
+          echo ""
+          echo "📋 從 Project 列出 schemes："
+          xcodebuild -project PetProject.xcodeproj -list
+          echo ""
+
+      - name: Test build with detailed output - 詳細構建測試
+        run: |
+          cd ios
+          echo "🔨 === 詳細構建測試 ==="
+
+          # 獲取所有可用的 schemes
+          SCHEMES=$(xcodebuild -project PetProject.xcodeproj -list | grep "Schemes:" -A 100 | grep -v "Schemes:" | grep -v "^$" | tr -d ' ')
+
+          echo "找到的 schemes: $SCHEMES"
+          echo ""
+
+          # 測試每個 scheme，使用詳細輸出
+          for scheme in $SCHEMES; do
+            echo "🔍 測試 scheme: $scheme"
+            echo "構建命令："
+            echo "xcodebuild -project PetProject.xcodeproj -scheme \"$scheme\" -configuration Debug -destination 'generic/platform=iOS Simulator' -derivedDataPath build -allowProvisioningUpdates build"
+            echo ""
+            
+            # 執行構建並捕獲詳細輸出
+            xcodebuild -project PetProject.xcodeproj \
+                       -scheme "$scheme" \
+                       -configuration Debug \
+                       -destination 'generic/platform=iOS Simulator' \
+                       -derivedDataPath build \
+                       -allowProvisioningUpdates \
+                       build 2>&1 | tee "build_${scheme}.log"
+            
+            BUILD_EXIT_CODE=$?
+            echo ""
+            echo "Scheme $scheme 構建結果: exit code $BUILD_EXIT_CODE"
+            
+            if [ $BUILD_EXIT_CODE -eq 0 ]; then
+              echo "✅ scheme $scheme 構建成功！"
+            else
+              echo "❌ scheme $scheme 構建失敗，exit code: $BUILD_EXIT_CODE"
+              echo "最後 20 行錯誤日誌："
+              tail -20 "build_${scheme}.log"
+            fi
+            echo ""
+          done
+
+      - name: Check build logs - 檢查構建日誌
+        run: |
+          cd ios
+          echo "📋 === 檢查構建日誌 ==="
+
+          # 列出所有構建日誌
+          echo "構建日誌文件："
+          ls -la build_*.log || echo "沒有構建日誌文件"
+          echo ""
+
+          # 檢查 DerivedData 目錄
+          echo "DerivedData 目錄："
+          ls -la build/ || echo "DerivedData 目錄不存在"
+          echo ""
+
+      - name: Build summary - 構建總結
+        run: |
+          echo "🎯 === 詳細診斷完成 ==="
+          echo "請檢查上面的輸出，找出具體問題："
+          echo ""
+          echo "🔍 檢查項目："
+          echo "1. 是否有 workspace 文件"
+          echo "2. CocoaPods 依賴是否正確安裝"
+          echo "3. 可用的 scheme 名稱"
+          echo "4. 每個 scheme 的構建結果"
+          echo "5. 具體的錯誤信息和 exit code"
+          echo "6. 構建日誌中的詳細錯誤"
+          echo ""
+          echo "💡 建議："
+          echo "- 檢查 CocoaPods 依賴是否完整"
+          echo "- 確認 scheme 名稱是否正確"
+          echo "- 查看構建日誌中的具體錯誤"
+          echo "- 檢查 React Native 原生模組配置"
