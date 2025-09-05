@@ -24,33 +24,12 @@ end
 target 'PetProject' do
   config = use_native_modules!
 
-  # 手動設定 React Native，跳過版本檢查
-  react_native_path = config[:reactNativePath]
-  app_path = "#{Pod::Config.instance.installation_root}/.."
-  
-  # 手動載入 React Native 模組
-  pod 'React', :path => react_native_path
-  pod 'React-Core', :path => react_native_path
-  pod 'React-CoreModules', :path => react_native_path
-  pod 'React-RCTText', :path => react_native_path
-  pod 'React-RCTNetwork', :path => react_native_path
-  pod 'React-RCTSettings', :path => react_native_path
-  pod 'React-RCTAnimation', :path => react_native_path
-  pod 'React-RCTBlob', :path => react_native_path
-  pod 'React-RCTImage', :path => react_native_path
-  pod 'React-RCTLinking', :path => react_native_path
-  pod 'React-RCTWebSocket', :path => react_native_path
-  pod 'React-Core/DevSupport', :path => react_native_path
-  pod 'React-Core/RCTWebSocket', :path => react_native_path
-  pod 'React-Core/RCTLinkingManager', :path => react_native_path
-  pod 'React-Core/RCTNetwork', :path => react_native_path
-  pod 'React-Core/RCTSettings', :path => react_native_path
-  pod 'React-Core/RCTText', :path => react_native_path
-  pod 'React-Core/RCTAnimation', :path => react_native_path
-  pod 'React-Core/RCTBlob', :path => react_native_path
-  pod 'React-Core/RCTImage', :path => react_native_path
-  pod 'React-Core/RCTLinking', :path => react_native_path
-  pod 'React-Core/RCTWebSocket', :path => react_native_path
+  use_react_native!(
+    :path => config[:reactNativePath],
+    :app_path => "#{Pod::Config.instance.installation_root}/..",
+    :fabric_enabled => false,
+    :hermes_enabled => false
+  )
 
   post_install do |installer|
     # https://github.com/facebook/react-native/blob/main/packages/react-native/scripts/react_native_pods.rb#L197-L202
