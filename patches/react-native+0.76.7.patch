@@ -1,3 +1,21 @@
+diff --git a/node_modules/react-native/scripts/cocoapods/helpers.rb b/node_modules/react-native/scripts/cocoapods/helpers.rb
+index feed792..f9dabfc 100644
+--- a/node_modules/react-native/scripts/cocoapods/helpers.rb
++++ b/node_modules/react-native/scripts/cocoapods/helpers.rb
+@@ -64,11 +64,11 @@ module Helpers
+         }
+ 
+         def self.min_ios_version_supported
+-            return '15.1'
++            return '12.0'
+         end
+ 
+         def self.min_xcode_version_supported
+-            return '15.1'
++            return '13.0'
+         end
+ 
+         def self.folly_config
 diff --git a/node_modules/react-native/scripts/cocoapods/utils.rb b/node_modules/react-native/scripts/cocoapods/utils.rb
 index a9cf0fa..0936b4f 100644
 --- a/node_modules/react-native/scripts/cocoapods/utils.rb
