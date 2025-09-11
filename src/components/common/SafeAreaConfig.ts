@@ -22,8 +22,8 @@ export const DEFAULT_SAFE_AREA_CONFIG: SafeAreaConfig = {
   edges: ['top', 'bottom'],
   showStatusBar: true,
   headerPadding: {
-    top: 16,
-    bottom: 8,
+    top: 24,
+    bottom: 12,
     horizontal: 0,
   },
 };
@@ -36,6 +36,7 @@ export const PAGE_CONFIGS = {
   // 搜尋頁面
   search: {
     ...DEFAULT_SAFE_AREA_CONFIG,
+    backgroundColor: '#f0f8ff', // 淺藍色背景來驗證安全區域
     headerPadding: {
       top: 20,
       bottom: 8,
@@ -46,6 +47,7 @@ export const PAGE_CONFIGS = {
   // 預訂頁面
   booking: {
     ...DEFAULT_SAFE_AREA_CONFIG,
+    backgroundColor: '#f5f5dc', // 米色背景來驗證安全區域
     headerPadding: {
       top: 20,
       bottom: 16,
@@ -82,8 +84,8 @@ export const PAGE_CONFIGS = {
     backgroundColor: '#9ec7ff',
     statusBarStyle: 'dark-content',
     headerPadding: {
-      top: 16,
-      bottom: 8,
+      top: 24,
+      bottom: 12,
       horizontal: 16,
     },
   },
