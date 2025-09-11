@@ -7,11 +7,11 @@ import {
   Image,
   TouchableOpacity,
   Animated,
+  Text,
 } from 'react-native';
-import MapView, {Marker} from 'react-native-maps';
-import {darkStyle} from '../../constants/mapStyle';
 import ImageAssets from '../../constants/ImageAssets';
 import {getImageSource} from '../../utils/getImageSource';
+import GoogleMapView from './GoogleMapView';
 
 type Props = {
   lat: number;
@@ -21,6 +21,9 @@ type Props = {
   containerStyle?: StyleProp<ViewStyle>;
   onPressMarker?: () => void;
   userLocation?: {latitude: number; longitude: number} | null;
+  showMap?: boolean;
+  onMapPress?: (latitude: number, longitude: number) => void;
+  useCurrentLocation?: boolean;
 };
 
 // Pulse 動畫 Marker（外層絕對定位）
@@ -83,45 +86,67 @@ const PulseOverlay = ({lat, lng}) => {
 const MapViewComponent: React.FC<Props> = ({
   lat,
   lng,
+  title,
+  description,
   containerStyle,
   onPressMarker,
+  showMap = false,
+  onMapPress,
+  useCurrentLocation = false,
 }) => {
-  // 移除內部 userLocation 狀態與 useEffect
+  const [isMapVisible, setIsMapVisible] = useState(showMap);
+
+  const handleMapPress = (latitude: number, longitude: number) => {
+    if (onMapPress) {
+      onMapPress(latitude, longitude);
+    }
+  };
+
+  if (isMapVisible) {
+    return (
+      <View style={[styles.mapContainer, containerStyle]}>
+             <GoogleMapView
+               style={styles.mapView}
+             />
+        <TouchableOpacity
+          style={styles.closeMapButton}
+          onPress={() => setIsMapVisible(false)}>
+          <Text style={styles.closeMapButtonText}>關閉地圖</Text>
+        </TouchableOpacity>
+      </View>
+    );
+  }
 
   return (
     <View style={[styles.container, containerStyle]}>
-      {/* 水波紋動畫 疊在地圖上方，預設顯示在地圖中心（即 marker 位置） */}
-      <PulseOverlay lat={lat} lng={lng} />
-      <MapView
-        style={StyleSheet.absoluteFill}
-        initialRegion={{
-          latitude: lat,
-          longitude: lng,
-          latitudeDelta: 0.01,
-          longitudeDelta: 0.01,
-        }}
-        customMapStyle={darkStyle}
-        showsUserLocation={true} // ✅ 顯示使用者位置
-        followsUserLocation={true} // ✅ 地圖跟隨使用者（可選）
-        showsMyLocationButton={false} // ✅ 隱藏右下角定位按鈕
-        toolbarEnabled={false} // ✅ 禁止點擊 marker 彈出圖示選單
-      >
-        {/* 目的地 marker 只用 image 屬性 */}
-        <Marker
-          coordinate={{latitude: lat, longitude: lng}}
-          image={getImageSource(ImageAssets.marker)}
-        />
-      </MapView>
-
-      <TouchableOpacity onPress={onPressMarker} style={styles.markerWrap}>
-        <View>
+      <View style={styles.locationCard}>
+        <View style={styles.locationIcon}>
           <Image
             source={getImageSource(ImageAssets.map)}
             style={styles.markerIcon}
             resizeMode="contain"
           />
         </View>
-      </TouchableOpacity>
+        <View style={styles.locationInfo}>
+          {title && <Text style={styles.locationTitle}>{title}</Text>}
+          {description && <Text style={styles.locationDescription}>{description}</Text>}
+          <Text style={styles.coordinates}>
+            經度: {lng.toFixed(6)}, 緯度: {lat.toFixed(6)}
+          </Text>
+        </View>
+        <View style={styles.buttonContainer}>
+          {onPressMarker && (
+            <TouchableOpacity onPress={onPressMarker} style={styles.actionButton}>
+              <Text style={styles.actionButtonText}>查看</Text>
+            </TouchableOpacity>
+          )}
+          <TouchableOpacity
+            onPress={() => setIsMapVisible(true)}
+            style={styles.mapButton}>
+            <Text style={styles.mapButtonText}>地圖</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
     </View>
   );
 };
@@ -130,31 +155,101 @@ export default MapViewComponent;
 
 const styles = StyleSheet.create({
   container: {
-    height: 300,
+    height: 120,
     borderRadius: 12,
     overflow: 'hidden',
   },
-  customMarker: {
-    width: 12,
-    height: 12,
-    backgroundColor: '#EF4444',
-    borderRadius: 6,
-    borderWidth: 2,
-    borderColor: '#fff',
+  mapContainer: {
+    height: 300,
+    borderRadius: 12,
+    overflow: 'hidden',
+    position: 'relative',
   },
-  markerWrap: {
+  mapView: {
+    flex: 1,
+  },
+  closeMapButton: {
     position: 'absolute',
     top: 10,
     right: 10,
+    backgroundColor: 'rgba(0, 0, 0, 0.7)',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 6,
+  },
+  closeMapButtonText: {
+    color: '#fff',
+    fontSize: 12,
+    fontWeight: '500',
+  },
+  locationCard: {
+    flex: 1,
+    flexDirection: 'row',
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    padding: 16,
+    alignItems: 'center',
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOpacity: 0.1,
+    shadowOffset: {width: 0, height: 1},
+    shadowRadius: 2,
+  },
+  locationIcon: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: '#f0f0f0',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 12,
   },
   markerIcon: {
-    width: 36,
-    height: 36,
+    width: 24,
+    height: 24,
   },
-  pulse: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: '#FF9800',
+  locationInfo: {
+    flex: 1,
+  },
+  locationTitle: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#333',
+    marginBottom: 4,
+  },
+  locationDescription: {
+    fontSize: 14,
+    color: '#666',
+    marginBottom: 4,
+  },
+  coordinates: {
+    fontSize: 12,
+    color: '#999',
+  },
+  buttonContainer: {
+    flexDirection: 'row',
+    gap: 8,
+  },
+  actionButton: {
+    backgroundColor: '#007AFF',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 6,
+  },
+  actionButtonText: {
+    color: '#fff',
+    fontSize: 12,
+    fontWeight: '500',
+  },
+  mapButton: {
+    backgroundColor: '#34C759',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 6,
+  },
+  mapButtonText: {
+    color: '#fff',
+    fontSize: 12,
+    fontWeight: '500',
   },
 });

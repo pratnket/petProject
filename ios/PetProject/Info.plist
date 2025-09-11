@@ -22,18 +22,28 @@
 	<string>????</string>
 	<key>CFBundleVersion</key>
 	<string>$(CURRENT_PROJECT_VERSION)</string>
+	<key>GMSApiKey</key>
+	<string>AIzaSyBFw0Qbyq9zTFTd-tUY6dOWWgUfOzu0BmU</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>NSAppTransportSecurity</key>
 	<dict>
-	  <!-- Do not change NSAllowsArbitraryLoads to true, or you will risk app rejection! -->
 		<key>NSAllowsArbitraryLoads</key>
 		<false/>
 		<key>NSAllowsLocalNetworking</key>
 		<true/>
 	</dict>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>此應用程式需要存取您的位置以顯示附近的地圖和服務</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
-	<string></string>
+	<string>此應用程式需要存取您的位置以顯示附近的地圖和服務</string>
+	<key>RCTNewArchEnabled</key>
+	<false/>
+	<key>UIAppFonts</key>
+	<array>
+		<string>Ionicons.ttf</string>
+		<string>Feather.ttf</string>
+	</array>
 	<key>UILaunchStoryboardName</key>
 	<string>LaunchScreen</string>
 	<key>UIRequiredDeviceCapabilities</key>

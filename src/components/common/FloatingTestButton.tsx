@@ -13,7 +13,7 @@ import {
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {useModal} from '../../context/ModalContext';
-import Sound from 'react-native-sound';
+// react-native-sound 已移除
 
 const {width: SCREEN_WIDTH, height: SCREEN_HEIGHT} = Dimensions.get('window');
 const BUTTON_SIZE = 50;
@@ -39,9 +39,7 @@ const FloatingTestButton: React.FC<FloatingTestButtonProps> = ({
   const [storageValue, setStorageValue] = useState('');
   const [existingKeys, setExistingKeys] = useState<string[]>([]);
 
-  // 新增：音樂播放狀態
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [currentSound, setCurrentSound] = useState<Sound | null>(null);
+  // 音樂播放功能已移除
 
   // 新增：Keychain 狀態
   const [keychainStatus, setKeychainStatus] = useState<string>('未檢查');
@@ -55,19 +53,10 @@ const FloatingTestButton: React.FC<FloatingTestButtonProps> = ({
     loadStorageInfo();
     checkKeychainStatus(); // 重新啟用 Keychain 檢查
 
-    // 初始化 Sound
-    Sound.setCategory('Playback');
+    // Sound 初始化已移除
   }, []);
 
-  // 組件卸載時清理音樂
-  useEffect(() => {
-    return () => {
-      if (currentSound) {
-        currentSound.stop();
-        currentSound.release();
-      }
-    };
-  }, [currentSound]);
+  // 音樂清理已移除
 
   const loadPosition = async () => {
     try {
@@ -243,87 +232,13 @@ const FloatingTestButton: React.FC<FloatingTestButtonProps> = ({
     },
   });
 
-  // 音樂播放功能
+  // 音樂播放功能已移除
   const playMusic = () => {
-    if (isPlaying) return;
-
-    try {
-      // 停止當前播放的音樂
-      if (currentSound) {
-        currentSound.stop();
-        currentSound.release();
-      }
-
-      // 創建新的音樂實例
-      // 嘗試多種載入方式
-      let sound: Sound;
-
-      // 方式1: 使用 MAIN_BUNDLE
-      sound = new Sound('music.mp3', Sound.MAIN_BUNDLE, error => {
-        if (error) {
-          console.error('MAIN_BUNDLE 載入失敗:', error);
-
-          // 方式2: 嘗試使用 DOCUMENT 目錄
-          sound = new Sound('music.mp3', Sound.DOCUMENT, error2 => {
-            if (error2) {
-              console.error('DOCUMENT 載入也失敗:', error2);
-              console.error('錯誤詳情:', JSON.stringify(error2, null, 2));
-              Alert.alert(
-                '錯誤',
-                `音樂載入失敗: ${error2.message || '未知錯誤'}`,
-              );
-              return;
-            }
-
-            // 成功載入，設置循環播放
-            sound.setNumberOfLoops(-1);
-            sound.play(success => {
-              if (success) {
-                console.log('音樂播放成功 (DOCUMENT)');
-              } else {
-                console.log('音樂播放失敗 (DOCUMENT)');
-              }
-            });
-
-            setCurrentSound(sound);
-            setIsPlaying(true);
-          });
-          return;
-        }
-
-        // 設置循環播放
-        sound.setNumberOfLoops(-1); // -1 表示無限循環
-
-        // 播放音樂
-        sound.play(success => {
-          if (success) {
-            console.log('音樂播放成功');
-          } else {
-            console.log('音樂播放失敗');
-          }
-        });
-
-        setCurrentSound(sound);
-        setIsPlaying(true);
-      });
-    } catch (error) {
-      console.error('播放音樂錯誤:', error);
-      Alert.alert('錯誤', '播放音樂失敗');
-    }
+    Alert.alert('提示', '音樂播放功能已暫時停用');
   };
 
   const stopMusic = () => {
-    if (!isPlaying || !currentSound) return;
-
-    try {
-      currentSound.stop();
-      currentSound.release();
-      setCurrentSound(null);
-      setIsPlaying(false);
-      console.log('音樂已停止');
-    } catch (error) {
-      console.error('停止音樂錯誤:', error);
-    }
+    Alert.alert('提示', '音樂播放功能已暫時停用');
   };
 
   // 功能函數
@@ -479,27 +394,7 @@ const FloatingTestButton: React.FC<FloatingTestButtonProps> = ({
             <Text style={styles.menuText}>🔐 檢查 Keychain 狀態</Text>
           </TouchableOpacity>
 
-          {/* 音樂控制 */}
-          <View style={styles.musicSection}>
-            <Text style={styles.musicLabel}>🎵 音樂控制</Text>
-            <View style={styles.musicButtons}>
-              <TouchableOpacity
-                style={[styles.musicButton, styles.playButton]}
-                onPress={playMusic}
-                disabled={isPlaying}>
-                <Text style={styles.musicButtonText}>
-                  {isPlaying ? '🔴 播放中' : '▶️ 播放'}
-                </Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                style={[styles.musicButton, styles.stopButton]}
-                onPress={stopMusic}
-                disabled={!isPlaying}>
-                <Text style={styles.musicButtonText}>⏹️ 停止</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
+          {/* 音樂控制已移除 */}
 
           <TouchableOpacity
             style={styles.menuItem}
@@ -620,42 +515,7 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 14,
   },
-  musicSection: {
-    marginVertical: 8,
-    paddingVertical: 8,
-    borderTopWidth: 1,
-    borderTopColor: 'rgba(255, 255, 255, 0.2)',
-  },
-  musicLabel: {
-    color: '#fff',
-    fontSize: 12,
-    fontWeight: '600',
-    marginBottom: 8,
-    textAlign: 'center',
-  },
-  musicButtons: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    gap: 8,
-  },
-  musicButton: {
-    flex: 1,
-    paddingVertical: 6,
-    paddingHorizontal: 8,
-    borderRadius: 6,
-    alignItems: 'center',
-  },
-  playButton: {
-    backgroundColor: '#4CAF50',
-  },
-  stopButton: {
-    backgroundColor: '#F44336',
-  },
-  musicButtonText: {
-    color: '#fff',
-    fontSize: 11,
-    fontWeight: '500',
-  },
+  // 音樂相關樣式已移除
   modalOverlay: {
     flex: 1,
     backgroundColor: 'rgba(0, 0, 0, 0.5)',

@@ -40,7 +40,7 @@ const useCurrentLocation = () => {
           enableHighAccuracy: true,
           timeout: 10000,
         });
-      } else {
+      } else if (Platform.OS === 'android') {
         try {
           const granted = await PermissionsAndroid.request(
             PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION
@@ -65,6 +65,13 @@ const useCurrentLocation = () => {
         } catch (e: any) {
           setError(e.message);
         }
+      } else if (Platform.OS === 'ios') {
+        // iOS 使用原生權限處理
+        Geolocation.getCurrentPosition(onSuccess, onError, {
+          enableHighAccuracy: true,
+          timeout: 10000,
+          maximumAge: 10000,
+        });
       }
     };
 
