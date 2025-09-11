@@ -13,6 +13,12 @@ export interface SafeAreaConfig {
     bottom: number;
     horizontal: number;
   };
+  searchBar?: {
+    backgroundColor: string;
+    borderColor: string;
+    textColor: string;
+    placeholderColor: string;
+  };
 }
 
 // 預設配置
@@ -36,7 +42,7 @@ export const PAGE_CONFIGS = {
   // 搜尋頁面
   search: {
     ...DEFAULT_SAFE_AREA_CONFIG,
-    backgroundColor: '#f0f8ff', // 淺藍色背景來驗證安全區域
+    backgroundColor: '#ffffff', // 淺藍色背景
     headerPadding: {
       top: 20,
       bottom: 8,

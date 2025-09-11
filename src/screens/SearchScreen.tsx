@@ -1,13 +1,13 @@
 import React, {useEffect, useState} from 'react';
 import {View, StyleSheet} from 'react-native';
-import PageWrapper from '../components/common/PageWrapper';
-import HeaderWrapper from '../components/common/HeaderWrapper';
+import PageWrapper from '../components/safe-area/PageWrapper';
+import HeaderWrapper from '../components/safe-area/HeaderWrapper';
+import SearchBar from '../components/search/SearchBar';
 import {useNavigation, useRoute} from '@react-navigation/native'; // 正確導入 useRoute
 import {StackNavigationProp} from '@react-navigation/stack';
 import {RouteProp} from '@react-navigation/native'; // 正確導入 RouteProp
 import {RootStackParamList} from '../navigation/MainNavigator'; // 根據你的 MainNavigator 路徑
 
-import SearchBar from '../components/search/SearchBar';
 import FilterBar from '../components/search/FilterBar';
 import HotelList from '../components/PlatformHotelList';
 
@@ -73,7 +73,7 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-start',
   },
   header: {
-    backgroundColor: '#fff',
+    backgroundColor: '#9ec7ff', // 淺藍色背景
   },
   listArea: {
     flex: 1, // ⭐️ 必須讓列表區塊可以伸展

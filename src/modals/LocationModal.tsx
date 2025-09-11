@@ -7,7 +7,7 @@ import {
   Alert,
   FlatList,
 } from 'react-native';
-import ModalWrapper from '../components/common/ModalWrapper';
+import ModalWrapper from '../components/safe-area/ModalWrapper';
 import {useModal} from '../context/ModalContext';
 import {useSearchCondition} from '../context/SearchConditionContext';
 import {useSearchHistory} from '../context/SearchHistoryContext';

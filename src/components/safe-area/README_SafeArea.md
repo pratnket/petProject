@@ -11,7 +11,7 @@
 用於一般頁面的安全區域包裝。
 
 ```tsx
-import PageWrapper from '../components/common/PageWrapper';
+import PageWrapper from './PageWrapper';
 
 const MyScreen = () => {
   return (
@@ -27,7 +27,7 @@ const MyScreen = () => {
 用於 Modal 的全螢幕安全區域包裝。
 
 ```tsx
-import ModalWrapper from '../components/common/ModalWrapper';
+import ModalWrapper from './ModalWrapper';
 
 const MyModal = () => {
   return (
@@ -43,7 +43,7 @@ const MyModal = () => {
 使用 HOC 模式自動包裝組件。
 
 ```tsx
-import withSafeArea from '../components/common/withSafeArea';
+import withSafeArea from './withSafeArea';
 
 const MyScreen = () => {
   return <View>{/* 頁面內容 */}</View>;

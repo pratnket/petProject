@@ -6,7 +6,7 @@ import {
   TouchableOpacity,
   ScrollView,
 } from 'react-native';
-import PageWrapper from '../components/common/PageWrapper';
+import PageWrapper from '../components/safe-area/PageWrapper';
 import {useAuth} from '../context/AuthContext';
 import {useNavigation} from '@react-navigation/native';
 import {StackNavigationProp} from '@react-navigation/stack';
@@ -56,10 +56,7 @@ const MemberScreen = () => {
   };
 
   return (
-    <PageWrapper
-      style={styles.container}
-      backgroundColor="#F7F2EF"
-      statusBarStyle="dark-content">
+    <PageWrapper style={styles.container} pageType="member">
       {isSignedIn ? (
         // 已登入狀態 - 會員中心
         <ScrollView

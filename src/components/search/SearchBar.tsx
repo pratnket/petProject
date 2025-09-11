@@ -17,6 +17,7 @@ interface SearchBarProps extends TextInputProps {
   onBack?: () => void;
   showClearIcon?: boolean;
   showSearchIcon?: boolean;
+  style?: any; // 自訂樣式
 }
 
 const SearchBar: React.FC<SearchBarProps> = ({
@@ -27,10 +28,11 @@ const SearchBar: React.FC<SearchBarProps> = ({
   onBack,
   showClearIcon = true,
   showSearchIcon = true,
+  style,
   ...props
 }) => {
   return (
-    <View style={styles.wrapper}>
+    <View style={[styles.wrapper]}>
       {onBack && (
         <TouchableOpacity style={styles.iconLeft} onPress={onBack}>
           <Icon name="arrow-back" size={24} color={Colors.icon.default} />
@@ -43,7 +45,9 @@ const SearchBar: React.FC<SearchBarProps> = ({
           value={value}
           onChangeText={onChangeText}
           placeholder="輸入地點"
-          placeholderTextColor={Colors.input.placeholder}
+          placeholderTextColor={
+            style?.placeholderTextColor || Colors.input.placeholder
+          }
           onSubmitEditing={onSubmit}
           {...props}
         />
@@ -89,11 +93,12 @@ const styles = StyleSheet.create({
   input: {
     height: 40,
     borderWidth: 1,
-    borderColor: '#FF8C00',
+    borderColor: Colors.input.border,
     borderRadius: 5,
     paddingLeft: 10,
     paddingRight: 80,
     fontSize: 16,
+    backgroundColor: Colors.input.background,
   },
   iconWrapper: {
     position: 'absolute',
@@ -112,7 +117,7 @@ const styles = StyleSheet.create({
     minHeight: 40,
   },
   searchIcon: {
-    backgroundColor: '#FF8C00',
+    backgroundColor: Colors.primary,
     borderRadius: 5,
   },
 });

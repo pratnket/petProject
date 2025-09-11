@@ -1,7 +1,7 @@
 import React from 'react';
 import {View, Text, StyleSheet, TouchableOpacity} from 'react-native';
-import ModalWrapper from '../components/common/ModalWrapper';
-import HeaderWrapper from '../components/common/HeaderWrapper';
+import ModalWrapper from '../components/safe-area/ModalWrapper';
+import HeaderWrapper from '../components/safe-area/HeaderWrapper';
 import {useModal} from '../context/ModalContext';
 import {useSearchCondition} from '../context/SearchConditionContext';
 import {DateRangePickerComponent} from '../components/common/DateRangePicker';

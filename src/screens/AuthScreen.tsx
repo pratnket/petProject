@@ -7,7 +7,7 @@ import {
   ScrollView,
   Alert,
 } from 'react-native';
-import PageWrapper from '../components/common/PageWrapper';
+import PageWrapper from '../components/safe-area/PageWrapper';
 import {useNavigation, useRoute} from '@react-navigation/native';
 import {StackNavigationProp} from '@react-navigation/stack';
 import {RouteProp} from '@react-navigation/native';
@@ -90,7 +90,7 @@ const AuthScreen = () => {
         },
       );
 
-      if (result && result.success) {
+      if (result && (result as any).success) {
         Alert.alert('成功', '驗證碼已發送到您的郵箱');
         // 開始倒計時
         setCountdown(60);
@@ -134,7 +134,7 @@ const AuthScreen = () => {
 
       console.log('📡 API響應:', result);
 
-      if (result && result.success) {
+      if (result && (result as any).success) {
         await storeAuthData(result);
 
         console.log('✅ 登入成功!');
@@ -223,7 +223,7 @@ const AuthScreen = () => {
 
       console.log('📡 API響應:', result);
 
-      if (result && result.success) {
+      if (result && (result as any).success) {
         Alert.alert('成功', '註冊成功！請使用新帳號登入');
         console.log('✅ 註冊成功!');
 

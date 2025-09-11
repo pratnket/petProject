@@ -20,8 +20,8 @@ import DateSelector from '../components/common/DateSelector';
 import TimePriceSelector from '../components/common/TimePriceSelector';
 import dayjs from 'dayjs';
 // 添加 PageWrapper 導入
-import PageWrapper from '../components/common/PageWrapper';
-import HeaderWrapper from '../components/common/HeaderWrapper';
+import PageWrapper from '../components/safe-area/PageWrapper';
+import HeaderWrapper from '../components/safe-area/HeaderWrapper';
 
 // 錯誤邊界組件
 class ErrorBoundary extends React.Component<
