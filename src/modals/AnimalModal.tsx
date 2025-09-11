@@ -1,6 +1,6 @@
 import React from 'react';
 import {View, Text, StyleSheet, TouchableOpacity, FlatList} from 'react-native';
-import {SafeAreaView} from 'react-native-safe-area-context';
+import ModalWrapper from '../components/common/ModalWrapper';
 import {useModal} from '../context/ModalContext';
 import {useSearchCondition} from '../context/SearchConditionContext';
 import {useNavigation} from '@react-navigation/native';
@@ -45,7 +45,7 @@ const AnimalModal = () => {
   };
 
   return (
-    <SafeAreaView style={styles.fullScreen} edges={['top', 'bottom']}>
+    <ModalWrapper style={styles.fullScreen}>
       <View style={styles.innerContainer}>
         {/* 標題區 */}
         <View style={styles.header}>
@@ -91,7 +91,7 @@ const AnimalModal = () => {
           </TouchableOpacity>
         </View>
       </View>
-    </SafeAreaView>
+    </ModalWrapper>
   );
 };
 

@@ -4,10 +4,9 @@ import {
   Text,
   StyleSheet,
   TouchableOpacity,
-  StatusBar,
   ScrollView,
 } from 'react-native';
-import {SafeAreaView} from 'react-native-safe-area-context';
+import PageWrapper from '../components/common/PageWrapper';
 import {useAuth} from '../context/AuthContext';
 import {useNavigation} from '@react-navigation/native';
 import {StackNavigationProp} from '@react-navigation/stack';
@@ -57,9 +56,10 @@ const MemberScreen = () => {
   };
 
   return (
-    <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
-      <StatusBar barStyle="dark-content" backgroundColor="#F7F2EF" />
-
+    <PageWrapper
+      style={styles.container}
+      backgroundColor="#F7F2EF"
+      statusBarStyle="dark-content">
       {isSignedIn ? (
         // 已登入狀態 - 會員中心
         <ScrollView
@@ -171,7 +171,7 @@ const MemberScreen = () => {
           </View>
         </ScrollView>
       )}
-    </SafeAreaView>
+    </PageWrapper>
   );
 };
 

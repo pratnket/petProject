@@ -7,7 +7,7 @@ import {
   ScrollView,
   Alert,
 } from 'react-native';
-import {SafeAreaView} from 'react-native-safe-area-context';
+import PageWrapper from '../components/common/PageWrapper';
 import {useNavigation, useRoute} from '@react-navigation/native';
 import {StackNavigationProp} from '@react-navigation/stack';
 import {RouteProp} from '@react-navigation/native';
@@ -248,7 +248,7 @@ const AuthScreen = () => {
   };
 
   return (
-    <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
+    <PageWrapper style={styles.container}>
       <ScrollView
         style={styles.content}
         contentContainerStyle={styles.scrollContent}
@@ -414,7 +414,7 @@ const AuthScreen = () => {
           </View>
         )}
       </ScrollView>
-    </SafeAreaView>
+    </PageWrapper>
   );
 };
 

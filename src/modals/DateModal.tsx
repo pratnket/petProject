@@ -1,6 +1,6 @@
 import React from 'react';
 import {View, Text, StyleSheet, TouchableOpacity} from 'react-native';
-import {SafeAreaView, useSafeAreaInsets} from 'react-native-safe-area-context';
+import ModalWrapper from '../components/common/ModalWrapper';
 import {useModal} from '../context/ModalContext';
 import {useSearchCondition} from '../context/SearchConditionContext';
 import {DateRangePickerComponent} from '../components/common/DateRangePicker';
@@ -9,7 +9,6 @@ import Icon from '../components/PlatformIcon';
 const DateModal = () => {
   const {closeModal} = useModal();
   const {setDateRange} = useSearchCondition();
-  const insets = useSafeAreaInsets();
 
   const handleRangeSelected = (start: string, end: string) => {
     console.log('✅ 選擇的日期區間：', start, '到', end);
@@ -18,9 +17,7 @@ const DateModal = () => {
   };
 
   return (
-    <SafeAreaView
-      style={[styles.fullScreen, {paddingTop: insets.top}]}
-      edges={['top', 'bottom']}>
+    <ModalWrapper style={styles.fullScreen}>
       <View style={styles.header}>
         <TouchableOpacity onPress={closeModal} style={styles.backButton}>
           <Icon name="arrow-back" size={24} color="#333" />
@@ -34,7 +31,7 @@ const DateModal = () => {
       <View style={styles.content}>
         <DateRangePickerComponent onRangeSelected={handleRangeSelected} />
       </View>
-    </SafeAreaView>
+    </ModalWrapper>
   );
 };
 

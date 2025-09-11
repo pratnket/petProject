@@ -1,5 +1,6 @@
 import React, {useEffect, useState} from 'react';
 import {View, StyleSheet} from 'react-native';
+import PageWrapper from '../components/common/PageWrapper';
 import {useNavigation, useRoute} from '@react-navigation/native'; // 正確導入 useRoute
 import {StackNavigationProp} from '@react-navigation/stack';
 import {RouteProp} from '@react-navigation/native'; // 正確導入 RouteProp
@@ -38,12 +39,14 @@ const SearchScreen = () => {
 
   // 重新導向搜索頁
   const handleSearch = (text: string) => {
-    if (!text.trim()) return;
+    if (!text.trim()) {
+      return;
+    }
     navigation.navigate('Search', {keyword: text.trim()}); // ✅ 導頁
   };
 
   return (
-    <View style={styles.container}>
+    <PageWrapper style={styles.container}>
       <View style={styles.header}>
         <SearchBar
           value={searchKeyword}
@@ -59,7 +62,7 @@ const SearchScreen = () => {
       <View style={styles.listArea}>
         <HotelList />
       </View>
-    </View>
+    </PageWrapper>
   );
 };
 

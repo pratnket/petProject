@@ -7,7 +7,7 @@ import {
   Alert,
   FlatList,
 } from 'react-native';
-import {SafeAreaView} from 'react-native-safe-area-context';
+import ModalWrapper from '../components/common/ModalWrapper';
 import {useModal} from '../context/ModalContext';
 import {useSearchCondition} from '../context/SearchConditionContext';
 import {useSearchHistory} from '../context/SearchHistoryContext';
@@ -56,7 +56,7 @@ const LocationModal = () => {
   };
 
   return (
-    <SafeAreaView style={styles.fullScreen} edges={['top', 'bottom']}>
+    <ModalWrapper style={styles.fullScreen}>
       <View style={styles.innerContainer}>
         <View style={styles.header}>
           <SearchBar
@@ -119,7 +119,7 @@ const LocationModal = () => {
           </TouchableOpacity>
         </View>
       </View>
-    </SafeAreaView>
+    </ModalWrapper>
   );
 };
 
