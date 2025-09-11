@@ -56,7 +56,7 @@ const LocationModal = () => {
   };
 
   return (
-    <SafeAreaView style={styles.fullScreen} edges={['bottom']}>
+    <SafeAreaView style={styles.fullScreen} edges={['top', 'bottom']}>
       <View style={styles.innerContainer}>
         <View style={styles.header}>
           <SearchBar
