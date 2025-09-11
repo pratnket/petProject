@@ -80,8 +80,10 @@ const TabNavigator = () => {
 export type RootStackParamList = {
   Main: undefined;
   Search: {keyword: string};
-  HotelDetailScreen: {keyword: string};
-  BookingScreen: {keyword: string};
+  HotelDetailScreen: {hotel: any; plans: any[]};
+  BookingScreen: {hotel: any; plan: any; selectedSlot?: any};
+  NearbyMapScreen: undefined;
+  BookingFormScreen: {hotel: any; plan: any; selectedSlot: any};
   Auth: {defaultTab?: 'login' | 'register'};
 };
 
@@ -112,12 +114,18 @@ const MainNavigator = () => {
       <Stack.Screen
         name="HotelDetailScreen"
         component={HotelDetailScreen}
-        options={{headerShown: false}}
+        options={{
+          headerShown: false,
+          gestureEnabled: false, // 禁用滑動返回手勢
+        }}
       />
       <Stack.Screen
         name="BookingScreen"
         component={BookingScreen}
-        options={{headerShown: false}}
+        options={{
+          headerShown: false,
+          gestureEnabled: false, // 禁用滑動返回手勢
+        }}
       />
       <Stack.Screen
         name="Auth"

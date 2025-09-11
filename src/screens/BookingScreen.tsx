@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from 'react';
+import React, {useState, useEffect, useMemo} from 'react';
 import {
   View,
   Text,
@@ -27,11 +27,11 @@ class ErrorBoundary extends React.Component<
 > {
   constructor(props: {children: React.ReactNode}) {
     super(props);
-    this.state = { hasError: false };
+    this.state = {hasError: false};
   }
 
-  static getDerivedStateFromError(error: any) {
-    return { hasError: true };
+  static getDerivedStateFromError(_error: any) {
+    return {hasError: true};
   }
 
   componentDidCatch(error: any, errorInfo: any) {
@@ -43,10 +43,9 @@ class ErrorBoundary extends React.Component<
       return (
         <View style={styles.errorContainer}>
           <Text style={styles.errorText}>載入預訂頁面時發生錯誤</Text>
-          <TouchableOpacity 
+          <TouchableOpacity
             style={styles.retryButton}
-            onPress={() => this.setState({ hasError: false })}
-          >
+            onPress={() => this.setState({hasError: false})}>
             <Text style={styles.retryText}>重試</Text>
           </TouchableOpacity>
         </View>
@@ -71,7 +70,9 @@ const getDistanceInKm = (lat1, lon1, lat2, lon2) => {
 
 // 新增一個方法來包裝 slot 並加上 endtime
 const getSlotWithEndtime = (slot, hour) => {
-  if (!slot) return null;
+  if (!slot) {
+    return null;
+  }
   return {
     ...slot,
     endtime: dayjs(slot.selltime)
@@ -92,287 +93,290 @@ const BookingScreen = ({route, navigation}) => {
   );
   // 建立時間價格資料
   // 假資料：各日期的時段與價格
-  const allTimeSlots = {
-    '2025-08-07': [
-      {
-        selltime: '2025-08-07 09:00:00',
-        price: 580,
-        remain_count: 10,
-      },
-      {
-        selltime: '2025-08-07 09:15:00',
-        price: 580,
-        remain_count: 9,
-      },
-      {
-        selltime: '2025-08-07 09:30:00',
-        price: 580,
-        remain_count: 8,
-      },
-      {
-        selltime: '2025-08-07 09:45:00',
-        price: 580,
-        remain_count: 7,
-      },
-      {
-        selltime: '2025-08-07 10:00:00',
-        price: 580,
-        remain_count: 6,
-      },
-    ],
-    '2025-08-08': [
-      {
-        selltime: '2025-08-08 09:30:00',
-        price: 680,
-        remain_count: 1,
-      },
-      {
-        selltime: '2025-08-08 09:45:00',
-        price: 680,
-        remain_count: 2,
-      },
-      {
-        selltime: '2025-08-08 10:00:00',
-        price: 680,
-        remain_count: 3,
-      },
-      {
-        selltime: '2025-08-08 10:15:00',
-        price: 680,
-        remain_count: 4,
-      },
-      {
-        selltime: '2025-08-08 10:30:00',
-        price: 680,
-        remain_count: 5,
-      },
-      {
-        selltime: '2025-08-08 10:45:00',
-        price: 680,
-        remain_count: 6,
-      },
-      {
-        selltime: '2025-08-08 11:00:00',
-        price: 680,
-        remain_count: 7,
-      },
-      {
-        selltime: '2025-08-08 11:15:00',
-        price: 680,
-        remain_count: 8,
-      },
-      {
-        selltime: '2025-08-08 11:30:00',
-        price: 680,
-        remain_count: 9,
-      },
-      {
-        selltime: '2025-08-08 11:45:00',
-        price: 680,
-        remain_count: 9,
-      },
-      {
-        selltime: '2025-08-08 12:00:00',
-        price: 680,
-        remain_count: 9,
-      },
-      {
-        selltime: '2025-08-08 12:15:00',
-        price: 680,
-        remain_count: 9,
-      },
-      {
-        selltime: '2025-08-08 12:30:00',
-        price: 680,
-        remain_count: 8,
-      },
-      {
-        selltime: '2025-08-08 12:45:00',
-        price: 680,
-        remain_count: 7,
-      },
-      {
-        selltime: '2025-08-08 13:00:00',
-        price: 680,
-        remain_count: 6,
-      },
-      {
-        selltime: '2025-08-08 13:15:00',
-        price: 680,
-        remain_count: 5,
-      },
-      {
-        selltime: '2025-08-08 13:30:00',
-        price: 680,
-        remain_count: 4,
-      },
-      {
-        selltime: '2025-08-08 13:45:00',
-        price: 680,
-        remain_count: 3,
-      },
-      {
-        selltime: '2025-08-08 14:00:00',
-        price: 680,
-        remain_count: 2,
-      },
-      {
-        selltime: '2025-08-08 14:15:00',
-        price: 680,
-        remain_count: 1,
-      },
-    ],
-    '2025-08-09': [
-      {
-        selltime: '2025-08-09 10:00:00',
-        price: 880,
-        remain_count: 1,
-      },
-      {
-        selltime: '2025-08-09 10:15:00',
-        price: 880,
-        remain_count: 2,
-      },
-      {
-        selltime: '2025-08-09 10:30:00',
-        price: 880,
-        remain_count: 3,
-      },
-      {
-        selltime: '2025-08-09 10:45:00',
-        price: 880,
-        remain_count: 3,
-      },
-      {
-        selltime: '2025-08-09 11:00:00',
-        price: 880,
-        remain_count: 3,
-      },
-      {
-        selltime: '2025-08-09 11:15:00',
-        price: 880,
-        remain_count: 3,
-      },
-      {
-        selltime: '2025-08-09 11:30:00',
-        price: 880,
-        remain_count: 3,
-      },
-      {
-        selltime: '2025-08-09 11:45:00',
-        price: 880,
-        remain_count: 4,
-      },
-      {
-        selltime: '2025-08-09 12:00:00',
-        price: 880,
-        remain_count: 5,
-      },
-      {
-        selltime: '2025-08-09 12:15:00',
-        price: 880,
-        remain_count: 6,
-      },
-      {
-        selltime: '2025-08-09 12:30:00',
-        price: 880,
-        remain_count: 6,
-      },
-      {
-        selltime: '2025-08-09 12:45:00',
-        price: 880,
-        remain_count: 6,
-      },
-      {
-        selltime: '2025-08-09 13:00:00',
-        price: 880,
-        remain_count: 5,
-      },
-      {
-        selltime: '2025-08-09 13:15:00',
-        price: 880,
-        remain_count: 4,
-      },
-      {
-        selltime: '2025-08-09 13:30:00',
-        price: 880,
-        remain_count: 3,
-      },
-      {
-        selltime: '2025-08-09 13:45:00',
-        price: 1080,
-        remain_count: 3,
-      },
-      {
-        selltime: '2025-08-09 14:00:00',
-        price: 1080,
-        remain_count: 3,
-      },
-      {
-        selltime: '2025-08-09 14:15:00',
-        price: 1080,
-        remain_count: 3,
-      },
-      {
-        selltime: '2025-08-09 14:30:00',
-        price: 1080,
-        remain_count: 3,
-      },
-      {
-        selltime: '2025-08-09 14:45:00',
-        price: 1080,
-        remain_count: 2,
-      },
-      {
-        selltime: '2025-08-09 15:00:00',
-        price: 1080,
-        remain_count: 1,
-      },
-      {
-        selltime: '2025-08-09 16:45:00',
-        price: 1080,
-        remain_count: 3,
-      },
-      {
-        selltime: '2025-08-09 17:00:00',
-        price: 1080,
-        remain_count: 1,
-      },
-      {
-        selltime: '2025-08-09 17:15:00',
-        price: 1080,
-        remain_count: 1,
-      },
-      {
-        selltime: '2025-08-09 17:30:00',
-        price: 1280,
-        remain_count: 1,
-      },
-    ],
-    '2025-08-10': [
-      {
-        selltime: '2025-08-10 09:00:00',
-        price: 780,
-        remain_count: 5,
-      },
-      {
-        selltime: '2025-08-10 09:30:00',
-        price: 780,
-        remain_count: 3,
-      },
-      {
-        selltime: '2025-08-10 10:00:00',
-        price: 780,
-        remain_count: 8,
-      },
-      {
-        selltime: '2025-08-10 10:30:00',
-        price: 780,
-        remain_count: 2,
-      },
-      // 可以繼續添加更多時間段
-    ],
-  };
+  const allTimeSlots = useMemo(
+    () => ({
+      '2025-08-07': [
+        {
+          selltime: '2025-08-07 09:00:00',
+          price: 580,
+          remain_count: 10,
+        },
+        {
+          selltime: '2025-08-07 09:15:00',
+          price: 580,
+          remain_count: 9,
+        },
+        {
+          selltime: '2025-08-07 09:30:00',
+          price: 580,
+          remain_count: 8,
+        },
+        {
+          selltime: '2025-08-07 09:45:00',
+          price: 580,
+          remain_count: 7,
+        },
+        {
+          selltime: '2025-08-07 10:00:00',
+          price: 580,
+          remain_count: 6,
+        },
+      ],
+      '2025-08-08': [
+        {
+          selltime: '2025-08-08 09:30:00',
+          price: 680,
+          remain_count: 1,
+        },
+        {
+          selltime: '2025-08-08 09:45:00',
+          price: 680,
+          remain_count: 2,
+        },
+        {
+          selltime: '2025-08-08 10:00:00',
+          price: 680,
+          remain_count: 3,
+        },
+        {
+          selltime: '2025-08-08 10:15:00',
+          price: 680,
+          remain_count: 4,
+        },
+        {
+          selltime: '2025-08-08 10:30:00',
+          price: 680,
+          remain_count: 5,
+        },
+        {
+          selltime: '2025-08-08 10:45:00',
+          price: 680,
+          remain_count: 6,
+        },
+        {
+          selltime: '2025-08-08 11:00:00',
+          price: 680,
+          remain_count: 7,
+        },
+        {
+          selltime: '2025-08-08 11:15:00',
+          price: 680,
+          remain_count: 8,
+        },
+        {
+          selltime: '2025-08-08 11:30:00',
+          price: 680,
+          remain_count: 9,
+        },
+        {
+          selltime: '2025-08-08 11:45:00',
+          price: 680,
+          remain_count: 9,
+        },
+        {
+          selltime: '2025-08-08 12:00:00',
+          price: 680,
+          remain_count: 9,
+        },
+        {
+          selltime: '2025-08-08 12:15:00',
+          price: 680,
+          remain_count: 9,
+        },
+        {
+          selltime: '2025-08-08 12:30:00',
+          price: 680,
+          remain_count: 8,
+        },
+        {
+          selltime: '2025-08-08 12:45:00',
+          price: 680,
+          remain_count: 7,
+        },
+        {
+          selltime: '2025-08-08 13:00:00',
+          price: 680,
+          remain_count: 6,
+        },
+        {
+          selltime: '2025-08-08 13:15:00',
+          price: 680,
+          remain_count: 5,
+        },
+        {
+          selltime: '2025-08-08 13:30:00',
+          price: 680,
+          remain_count: 4,
+        },
+        {
+          selltime: '2025-08-08 13:45:00',
+          price: 680,
+          remain_count: 3,
+        },
+        {
+          selltime: '2025-08-08 14:00:00',
+          price: 680,
+          remain_count: 2,
+        },
+        {
+          selltime: '2025-08-08 14:15:00',
+          price: 680,
+          remain_count: 1,
+        },
+      ],
+      '2025-08-09': [
+        {
+          selltime: '2025-08-09 10:00:00',
+          price: 880,
+          remain_count: 1,
+        },
+        {
+          selltime: '2025-08-09 10:15:00',
+          price: 880,
+          remain_count: 2,
+        },
+        {
+          selltime: '2025-08-09 10:30:00',
+          price: 880,
+          remain_count: 3,
+        },
+        {
+          selltime: '2025-08-09 10:45:00',
+          price: 880,
+          remain_count: 3,
+        },
+        {
+          selltime: '2025-08-09 11:00:00',
+          price: 880,
+          remain_count: 3,
+        },
+        {
+          selltime: '2025-08-09 11:15:00',
+          price: 880,
+          remain_count: 3,
+        },
+        {
+          selltime: '2025-08-09 11:30:00',
+          price: 880,
+          remain_count: 3,
+        },
+        {
+          selltime: '2025-08-09 11:45:00',
+          price: 880,
+          remain_count: 4,
+        },
+        {
+          selltime: '2025-08-09 12:00:00',
+          price: 880,
+          remain_count: 5,
+        },
+        {
+          selltime: '2025-08-09 12:15:00',
+          price: 880,
+          remain_count: 6,
+        },
+        {
+          selltime: '2025-08-09 12:30:00',
+          price: 880,
+          remain_count: 6,
+        },
+        {
+          selltime: '2025-08-09 12:45:00',
+          price: 880,
+          remain_count: 6,
+        },
+        {
+          selltime: '2025-08-09 13:00:00',
+          price: 880,
+          remain_count: 5,
+        },
+        {
+          selltime: '2025-08-09 13:15:00',
+          price: 880,
+          remain_count: 4,
+        },
+        {
+          selltime: '2025-08-09 13:30:00',
+          price: 880,
+          remain_count: 3,
+        },
+        {
+          selltime: '2025-08-09 13:45:00',
+          price: 1080,
+          remain_count: 3,
+        },
+        {
+          selltime: '2025-08-09 14:00:00',
+          price: 1080,
+          remain_count: 3,
+        },
+        {
+          selltime: '2025-08-09 14:15:00',
+          price: 1080,
+          remain_count: 3,
+        },
+        {
+          selltime: '2025-08-09 14:30:00',
+          price: 1080,
+          remain_count: 3,
+        },
+        {
+          selltime: '2025-08-09 14:45:00',
+          price: 1080,
+          remain_count: 2,
+        },
+        {
+          selltime: '2025-08-09 15:00:00',
+          price: 1080,
+          remain_count: 1,
+        },
+        {
+          selltime: '2025-08-09 16:45:00',
+          price: 1080,
+          remain_count: 3,
+        },
+        {
+          selltime: '2025-08-09 17:00:00',
+          price: 1080,
+          remain_count: 1,
+        },
+        {
+          selltime: '2025-08-09 17:15:00',
+          price: 1080,
+          remain_count: 1,
+        },
+        {
+          selltime: '2025-08-09 17:30:00',
+          price: 1280,
+          remain_count: 1,
+        },
+      ],
+      '2025-08-10': [
+        {
+          selltime: '2025-08-10 09:00:00',
+          price: 780,
+          remain_count: 5,
+        },
+        {
+          selltime: '2025-08-10 09:30:00',
+          price: 780,
+          remain_count: 3,
+        },
+        {
+          selltime: '2025-08-10 10:00:00',
+          price: 780,
+          remain_count: 8,
+        },
+        {
+          selltime: '2025-08-10 10:30:00',
+          price: 780,
+          remain_count: 2,
+        },
+        // 可以繼續添加更多時間段
+      ],
+    }),
+    [],
+  );
 
   const handlePress = () => {
     navigation.navigate('BookingFormScreen', {hotel, plan, selectedSlot});
@@ -420,7 +424,7 @@ const BookingScreen = ({route, navigation}) => {
     };
 
     requestLocation();
-  }, []);
+  }, [hotel.lat, hotel.lng]);
 
   // 在 useEffect 加入自動選擇第一個時段
   useEffect(() => {
@@ -441,7 +445,7 @@ const BookingScreen = ({route, navigation}) => {
         }
       }
     }
-  }, [selectedDate, plan?.hour]);
+  }, [selectedDate, plan?.hour, allTimeSlots]);
 
   const openInGoogleMaps = () => {
     const url = `https://www.google.com/maps/dir/?api=1&destination=${hotel.address}`;
@@ -451,7 +455,10 @@ const BookingScreen = ({route, navigation}) => {
 
   return (
     <ErrorBoundary>
-      <ScrollView contentContainerStyle={styles.container}>
+      <ScrollView
+        style={styles.scrollView}
+        contentContainerStyle={styles.container}
+        showsVerticalScrollIndicator={false}>
         {/* 🔙 返回按鈕 */}
         <View style={styles.header}>
           <TouchableOpacity
@@ -462,113 +469,113 @@ const BookingScreen = ({route, navigation}) => {
           <Text style={styles.headerTitle}>{hotel?.name || '未知旅館'}</Text>
         </View>
 
-      {/* 套餐卡片 */}
-      <View style={styles.planCard}>
-        {loading && !hasError && (
-          <ActivityIndicator
-            style={StyleSheet.absoluteFill}
-            size="small"
-            color="#999"
+        {/* 套餐卡片 */}
+        <View style={styles.planCard}>
+          {loading && !hasError && (
+            <ActivityIndicator
+              style={StyleSheet.absoluteFill}
+              size="small"
+              color="#999"
+            />
+          )}
+          <Image
+            source={
+              hasError
+                ? getImageSource(ImageAssets.error)
+                : getImageSource(hotel.coverImage)
+            }
+            style={styles.image}
+            onLoadStart={() => setLoading(true)}
+            onLoadEnd={() => setLoading(false)}
+            onError={() => {
+              setHasError(true);
+              setLoading(false);
+            }}
           />
-        )}
-        <Image
-          source={
-            hasError
-              ? getImageSource(ImageAssets.error)
-              : getImageSource(hotel.coverImage)
-          }
-          style={styles.image}
-          onLoadStart={() => setLoading(true)}
-          onLoadEnd={() => setLoading(false)}
-          onError={() => {
-            setHasError(true);
-            setLoading(false);
-          }}
-        />
-        <View style={styles.planText}>
-          <Text style={styles.planLabel}>{plan.label}</Text>
-          <Text style={styles.time}>
-            開始　
-            {selectedSlot?.selltime
-              ? dayjs(selectedSlot?.selltime).format('MM月DD日 HH:mm')
-              : '—'}
-          </Text>
-          <Text style={styles.time}>
-            結束　
-            {selectedSlot?.selltime
-              ? dayjs(selectedSlot?.selltime)
-                  .add(plan?.hour, 'hour')
-                  .format('MM月DD日 HH:mm')
-              : '—'}
-          </Text>
+          <View style={styles.planText}>
+            <Text style={styles.planLabel}>{plan.label}</Text>
+            <Text style={styles.time}>
+              開始
+              {selectedSlot?.selltime
+                ? dayjs(selectedSlot?.selltime).format('MM月DD日 HH:mm')
+                : '—'}
+            </Text>
+            <Text style={styles.time}>
+              結束
+              {selectedSlot?.selltime
+                ? dayjs(selectedSlot?.selltime)
+                    .add(plan?.hour, 'hour')
+                    .format('MM月DD日 HH:mm')
+                : '—'}
+            </Text>
+          </View>
         </View>
-      </View>
 
-      <View style={styles.section}>
-        <Text style={styles.label}>地址</Text>
-        <Text>{hotel.address}</Text>
+        <View style={styles.section}>
+          <Text style={styles.label}>地址</Text>
+          <Text>{hotel.address}</Text>
 
-        {/* 地圖區塊 */}
-        {hotel.lat && hotel.lng && (
-          <MapViewComponent
-            lat={hotel.lat}
-            lng={hotel.lng}
-            title={hotel.name}
-            description={hotel.address}
-            containerStyle={{marginTop: 12, marginBottom: 8}}
-            onPressMarker={openInGoogleMaps} // ✅ 傳入點擊事件
+          {/* 地圖區塊 */}
+          {hotel.lat && hotel.lng && (
+            <MapViewComponent
+              lat={hotel.lat}
+              lng={hotel.lng}
+              title={hotel.name}
+              description={hotel.address}
+              containerStyle={styles.mapContainer}
+              onPressMarker={openInGoogleMaps} // ✅ 傳入點擊事件
+            />
+          )}
+
+          {/* 距離顯示 */}
+          {userLocation && distanceText && (
+            <Text style={styles.distanceText}>與你相距：約 {distanceText}</Text>
+          )}
+        </View>
+
+        <View style={styles.section}>
+          <Text style={styles.label}>商品內容</Text>
+          {hotel.description.map((line, idx) => (
+            <Text key={idx}>• {line}</Text>
+          ))}
+        </View>
+
+        <View style={styles.section}>
+          <Text style={styles.label}>選擇日期</Text>
+          <DateSelector
+            selectedDate={selectedDate}
+            onDateSelect={date => {
+              setSelectedDate(date);
+              const slot = allTimeSlots[date]?.[0];
+              setSelectedIndex(0);
+              setSelectedSlot(getSlotWithEndtime(slot, plan?.hour));
+            }}
+            availableDates={Object.keys(allTimeSlots)} // ⬅️ 加入這一行
           />
-        )}
 
-        {/* 距離顯示 */}
-        {userLocation && distanceText && (
-          <Text style={styles.distanceText}>與你相距：約 {distanceText}</Text>
-        )}
-      </View>
-
-      <View style={styles.section}>
-        <Text style={styles.label}>商品內容</Text>
-        {hotel.description.map((line, idx) => (
-          <Text key={idx}>• {line}</Text>
-        ))}
-      </View>
-
-      <View style={styles.section}>
-        <Text style={styles.label}>選擇日期</Text>
-        <DateSelector
-          selectedDate={selectedDate}
-          onDateSelect={date => {
-            setSelectedDate(date);
-            const slot = allTimeSlots[date]?.[0];
-            setSelectedIndex(0);
-            setSelectedSlot(getSlotWithEndtime(slot, plan?.hour));
-          }}
-          availableDates={Object.keys(allTimeSlots)} // ⬅️ 加入這一行
-        />
-
-        <TimePriceSelector
-          selectedDate={selectedDate} // 例如 '2025-07-25'
-          timeSlots={allTimeSlots} // 所有 7 日範圍時段 + 價格
-          selectedIndex={selectedIndex} // 當前選中的時間索引
-          onSelect={idx => {
-            setSelectedIndex(idx);
-            const slot = allTimeSlots[selectedDate]?.[idx];
-            setSelectedSlot(getSlotWithEndtime(slot, plan?.hour));
-          }}
-        />
-      </View>
-      {/* 新增吸底結帳區塊 */}
-      <View style={styles.checkoutBar}>
-        <View>
-          <Text style={styles.checkoutLabel}>結帳金額</Text>
-          <Text style={styles.checkoutAmount}>
-            TWD {selectedSlot?.price ?? '0'}
-          </Text>
+          <TimePriceSelector
+            selectedDate={selectedDate} // 例如 '2025-07-25'
+            timeSlots={allTimeSlots} // 所有 7 日範圍時段 + 價格
+            selectedIndex={selectedIndex} // 當前選中的時間索引
+            onSelect={idx => {
+              setSelectedIndex(idx);
+              const slot = allTimeSlots[selectedDate]?.[idx];
+              setSelectedSlot(getSlotWithEndtime(slot, plan?.hour));
+            }}
+          />
         </View>
-        <TouchableOpacity style={styles.checkoutButton} onPress={handlePress}>
-          <Text style={styles.checkoutButtonText}>立即預訂</Text>
-        </TouchableOpacity>
-      </View>
+        {/* 新增吸底結帳區塊 */}
+        <View style={styles.checkoutBar}>
+          <View>
+            <Text style={styles.checkoutLabel}>結帳金額</Text>
+            <Text style={styles.checkoutAmount}>
+              TWD {selectedSlot?.price ?? '0'}
+            </Text>
+          </View>
+          <TouchableOpacity style={styles.checkoutButton} onPress={handlePress}>
+            <Text style={styles.checkoutButtonText}>立即預訂</Text>
+          </TouchableOpacity>
+        </View>
       </ScrollView>
     </ErrorBoundary>
   );
@@ -577,7 +584,14 @@ const BookingScreen = ({route, navigation}) => {
 export default BookingScreen;
 
 const styles = StyleSheet.create({
-  container: {padding: 16, backgroundColor: '#fff', paddingBottom: 80},
+  scrollView: {
+    flex: 1,
+  },
+  container: {
+    padding: 16,
+    backgroundColor: '#fff',
+    paddingBottom: 80,
+  },
   header: {flexDirection: 'row', alignItems: 'center', marginBottom: 16},
   backButton: {padding: 4, marginRight: 8},
   headerTitle: {fontSize: 18, fontWeight: 'bold'},
@@ -595,6 +609,7 @@ const styles = StyleSheet.create({
   section: {marginBottom: 16},
   label: {fontWeight: 'bold', marginBottom: 4, fontSize: 15},
   distanceText: {marginTop: 4, color: '#555'},
+  mapContainer: {marginTop: 12, marginBottom: 8},
   checkoutBar: {
     flexDirection: 'row',
     alignItems: 'center',

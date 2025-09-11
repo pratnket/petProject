@@ -7,7 +7,6 @@ import {
   ScrollView,
   Animated,
 } from 'react-native';
-import {SafeAreaView} from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {useModal} from '../context/ModalContext';
 import {useNavigation} from '@react-navigation/native';
@@ -84,10 +83,10 @@ const WelcomeModal = () => {
   console.log('🎭 WelcomeModal 渲染');
 
   return (
-    <SafeAreaView style={styles.fullScreen}>
+    <View style={styles.fullScreenOverlay}>
       <Animated.View
         style={[
-          styles.innerContainer,
+          styles.fullScreenContainer,
           {
             opacity: fadeAnim,
             transform: [{scale: scaleAnim}],
@@ -155,22 +154,25 @@ const WelcomeModal = () => {
           </View>
         )}
       </Animated.View>
-    </SafeAreaView>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
-  fullScreen: {
+  fullScreenOverlay: {
     position: 'absolute',
     top: 0,
     left: 0,
     right: 0,
     bottom: 0,
     backgroundColor: '#F5F5DC',
+    zIndex: 99999, // 提高 zIndex 確保在最上層
+    elevation: 99999, // Android 的 elevation
   },
-  innerContainer: {
+  fullScreenContainer: {
     flex: 1,
-    justifyContent: 'space-between',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   closeButton: {
     position: 'absolute',
@@ -191,11 +193,14 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
+    width: '100%',
   },
   scrollContent: {
     paddingHorizontal: 24,
     paddingTop: 60,
     paddingBottom: 40,
+    flexGrow: 1,
+    justifyContent: 'center',
   },
   headerSection: {
     alignItems: 'center',

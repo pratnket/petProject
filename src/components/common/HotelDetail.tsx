@@ -16,55 +16,27 @@ import {useModal} from '../../context/ModalContext';
 // modals
 import SelectPlanModal from '../../modals/SelectPlanModal';
 
-// 錯誤邊界組件
-class ErrorBoundary extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = { hasError: false };
-  }
-
-  static getDerivedStateFromError(error) {
-    return { hasError: true };
-  }
-
-  componentDidCatch(error, errorInfo) {
-    console.error('HotelDetail Error:', error, errorInfo);
-  }
-
-  render() {
-    if (this.state.hasError) {
-      return (
-        <View style={styles.errorContainer}>
-          <Text style={styles.errorText}>載入旅館詳情時發生錯誤</Text>
-          <TouchableOpacity 
-            style={styles.retryButton}
-            onPress={() => this.setState({ hasError: false })}
-          >
-            <Text style={styles.retryText}>重試</Text>
-          </TouchableOpacity>
-        </View>
-      );
-    }
-
-    return this.props.children;
-  }
-}
-
 const screenWidth = Dimensions.get('window').width;
 
 const HotelDetail = ({route, navigation}) => {
   const {hotel, plans} = route.params;
 
   const {openModal, closeModal, activeModal} = useModal();
-  const [selectedPlan, setSelectedPlan] = useState(null);
+  const [_selectedPlan, setSelectedPlan] = useState(null);
 
   const getImageSource = img => {
-    if (!img) return require('../../assets/error.png'); // 預設圖片
+    if (!img) {
+      return require('../../assets/error.png'); // 預設圖片
+    }
     return typeof img === 'number' ? img : {uri: img};
   };
 
   const images = hotel?.images ?? (hotel?.image ? [hotel.image] : []);
   const [activeIndex, setActiveIndex] = useState(0);
+
+  // 如果沒有圖片，使用默認圖片
+  const displayImages =
+    images.length > 0 ? images : [require('../../assets/error.png')];
 
   const handleScroll = e => {
     const index = Math.round(e.nativeEvent.contentOffset.x / screenWidth);
@@ -81,48 +53,53 @@ const HotelDetail = ({route, navigation}) => {
   };
 
   return (
-    <ErrorBoundary>
-      <ScrollView style={styles.container}>
-        <View>
-          <FlatList
-            horizontal
-            pagingEnabled
-            data={images}
-            keyExtractor={(_, index) => index.toString()}
-            renderItem={({item}) => (
-              <Image source={getImageSource(item)} style={styles.image} />
-            )}
-            showsHorizontalScrollIndicator={false}
-            onScroll={handleScroll}
-            scrollEventThrottle={16}
-          />
+    <View style={styles.container}>
+      {/* 圖片輪播區域 - 固定在頂部，不參與垂直滑動 */}
+      <View style={styles.imageContainer}>
+        <FlatList
+          horizontal
+          pagingEnabled
+          data={displayImages}
+          keyExtractor={(_, index) => index.toString()}
+          renderItem={({item}) => (
+            <Image source={getImageSource(item)} style={styles.image} />
+          )}
+          showsHorizontalScrollIndicator={false}
+          onScroll={handleScroll}
+          scrollEventThrottle={16}
+        />
 
-          {/* Indicator dots */}
-          <View style={styles.dotsContainer}>
-            {images.map((_, index) => (
-              <View
-                key={index}
-                style={[styles.dot, activeIndex === index && styles.activeDot]}
-              />
-            ))}
-          </View>
-
-          {/* Top bar with back, heart, share */}
-          <View style={styles.topBar}>
-            <TouchableOpacity onPress={() => navigation.goBack()}>
-              <Icon name="arrow-back" size={20} color="#fff" />
-            </TouchableOpacity>
-            <View style={{flexDirection: 'row', gap: 12}}>
-              <TouchableOpacity>
-                <Icon name="heart-outline" size={20} color="#fff" />
-              </TouchableOpacity>
-              <TouchableOpacity>
-                <Icon name="share-social-outline" size={20} color="#fff" />
-              </TouchableOpacity>
-            </View>
-          </View>
+        {/* Indicator dots */}
+        <View style={styles.dotsContainer}>
+          {displayImages.map((_, index) => (
+            <View
+              key={index}
+              style={[styles.dot, activeIndex === index && styles.activeDot]}
+            />
+          ))}
         </View>
 
+        {/* Top bar with back, heart, share */}
+        <View style={styles.topBar}>
+          <TouchableOpacity onPress={() => navigation.goBack()}>
+            <Icon name="arrow-back" size={20} color="#fff" />
+          </TouchableOpacity>
+          <View style={styles.iconRow}>
+            <TouchableOpacity>
+              <Icon name="heart-outline" size={20} color="#fff" />
+            </TouchableOpacity>
+            <TouchableOpacity>
+              <Icon name="share-social-outline" size={20} color="#fff" />
+            </TouchableOpacity>
+          </View>
+        </View>
+      </View>
+
+      {/* 可滑動的內容區域 */}
+      <ScrollView
+        style={styles.contentScrollView}
+        contentContainerStyle={styles.contentContainer}
+        showsVerticalScrollIndicator={false}>
         <View style={styles.content}>
           <Text style={styles.title}>{hotel?.name || '未知旅館'}</Text>
 
@@ -135,7 +112,9 @@ const HotelDetail = ({route, navigation}) => {
 
           <View style={styles.addressRow}>
             <Icon name="location" size={16} color="#6b7280" />
-            <Text style={styles.addressText}>{hotel?.address || '地址未知'}</Text>
+            <Text style={styles.addressText}>
+              {hotel?.address || '地址未知'}
+            </Text>
           </View>
 
           <Text style={styles.sectionTitle}>商品內容</Text>
@@ -172,7 +151,7 @@ const HotelDetail = ({route, navigation}) => {
           )}
         </View>
       </ScrollView>
-    </ErrorBoundary>
+    </View>
   );
 };
 
@@ -184,7 +163,20 @@ const Facility = ({icon, label}) => (
 );
 
 const styles = StyleSheet.create({
-  container: {flex: 1, backgroundColor: '#fff'},
+  container: {
+    flex: 1,
+    backgroundColor: '#fff',
+  },
+  imageContainer: {
+    height: 200,
+    position: 'relative',
+  },
+  contentScrollView: {
+    flex: 1,
+  },
+  contentContainer: {
+    flexGrow: 1,
+  },
   image: {width: screenWidth, height: 200},
   topBar: {
     position: 'absolute',
@@ -195,6 +187,10 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+  },
+  iconRow: {
+    flexDirection: 'row',
+    gap: 12,
   },
   dotsContainer: {
     flexDirection: 'row',
@@ -247,29 +243,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   buttonText: {color: 'white', fontWeight: 'bold'},
-  errorContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 20,
-    backgroundColor: '#fff',
-  },
-  errorText: {
-    fontSize: 16,
-    color: '#ef4444',
-    textAlign: 'center',
-    marginBottom: 20,
-  },
-  retryButton: {
-    backgroundColor: '#3b82f6',
-    paddingHorizontal: 20,
-    paddingVertical: 10,
-    borderRadius: 8,
-  },
-  retryText: {
-    color: 'white',
-    fontWeight: 'bold',
-  },
 });
 
 export default HotelDetail;

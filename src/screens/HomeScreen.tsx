@@ -22,7 +22,6 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import LocationModal from '../modals/LocationModal';
 import DateModal from '../modals/DateModal';
 import AnimalModal from '../modals/AnimalModal';
-import WelcomeModal from '../modals/WelcomeModal';
 
 // Components
 import FloatingTestButton from '../components/common/FloatingTestButton';
@@ -158,7 +157,6 @@ const HomeScreen: React.FC = () => {
       {activeModal === 'location' && <LocationModal />}
       {activeModal === 'date' && <DateModal />}
       {activeModal === 'animal' && <AnimalModal />}
-      {activeModal === 'welcome' && <WelcomeModal />}
 
       {/* 可拖曳的測試按鈕 */}
       <FloatingTestButton visible={__DEV__} />

@@ -23,6 +23,8 @@ import NearbyMapScreen from '../../screens/NearbyMapScreen';
 
 // 使用 AuthContext
 import {useAuth} from '../../context/AuthContext';
+import {useModal} from '../../context/ModalContext';
+import WelcomeModal from '../../modals/WelcomeModal';
 
 // 客戶資訊詳細頁
 import BookingFormScreen from '../../screens/BookingFormScreen';
@@ -78,10 +80,10 @@ const TabNavigator = () => {
 export type RootStackParamList = {
   Main: undefined;
   Search: {keyword: string};
-  HotelDetailScreen: {keyword: string};
-  BookingScreen: {keyword: string};
-  NearbyMapScreen: {keyword: string};
-  BookingFormScreen: {keyword: string};
+  HotelDetailScreen: {hotel: any; plans: any[]};
+  BookingScreen: {hotel: any; plan: any; selectedSlot?: any};
+  NearbyMapScreen: undefined;
+  BookingFormScreen: {hotel: any; plan: any; selectedSlot: any};
   Auth: {defaultTab?: 'login' | 'register'};
 };
 
@@ -89,155 +91,188 @@ const Stack = createStackNavigator<RootStackParamList>();
 
 // **主導航器**
 const MainNavigator = () => {
+  const {activeModal} = useModal();
+
   return (
-    <Stack.Navigator
-      id={undefined}
-      initialRouteName="Main"
-      screenOptions={{
-        headerStyle: {backgroundColor: '#6200ee'},
-        headerTintColor: '#fff',
-        headerTitleStyle: {fontWeight: 'bold'},
-        // 🎨 優化導航動畫
-        transitionSpec: {
-          open: {
-            animation: 'timing',
-            config: {
-              duration: 300,
-              easing: require('react-native').Easing.bezier(0.25, 0.1, 0.25, 1),
-            },
-          },
-          close: {
-            animation: 'timing',
-            config: {
-              duration: 250,
-              easing: require('react-native').Easing.bezier(0.25, 0.1, 0.25, 1),
-            },
-          },
-        },
-        // 🎭 優雅的面板過渡
-        cardStyleInterpolator: ({current, layouts}) => {
-          return {
-            cardStyle: {
-              transform: [
-                {
-                  translateX: current.progress.interpolate({
-                    inputRange: [0, 1],
-                    outputRange: [layouts.screen.width, 0],
-                  }),
-                },
-              ],
-              opacity: current.progress.interpolate({
-                inputRange: [0, 1],
-                outputRange: [0.8, 1],
-              }),
-            },
-            overlayStyle: {
-              opacity: current.progress.interpolate({
-                inputRange: [0, 1],
-                outputRange: [0, 0.5],
-              }),
-            },
-          };
-        },
-        // 🚀 更快的響應
-        gestureEnabled: true,
-        gestureDirection: 'horizontal',
-        gestureResponseDistance: 50,
-        gestureVelocityImpact: 0.3,
-      }}>
-      {/* 這裡用 TabNavigator 作為主要畫面 */}
-      <Stack.Screen
-        name="Main"
-        component={TabNavigator}
-        options={{headerShown: false}}
-      />
-      <Stack.Screen
-        name="Search"
-        component={SearchScreen}
-        options={{headerShown: false}}
-      />
-      <Stack.Screen
-        name="HotelDetailScreen"
-        component={HotelDetailScreen}
-        options={{headerShown: false}}
-      />
-      <Stack.Screen
-        name="BookingScreen"
-        component={BookingScreen}
-        options={{headerShown: false}}
-      />
-      <Stack.Screen
-        name="BookingFormScreen"
-        component={BookingFormScreen}
-        options={{headerShown: false}}
-      />
-      <Stack.Screen
-        name="NearbyMapScreen"
-        component={NearbyMapScreen}
-        options={{headerShown: false}}
-      />
-      <Stack.Screen
-        name="Auth"
-        component={AuthScreen}
-        options={{
-          title: '登入與註冊',
-          headerShown: true,
-          headerStyle: {
-            backgroundColor: '#FFFFFF',
-            height: 42,
-          },
-          headerTitleStyle: {
-            fontFamily: 'Noto Sans TC',
-            fontWeight: '700',
-            fontSize: 16,
-            textAlign: 'center',
-          },
-          headerTintColor: '#000000',
-          // 🎨 Auth 頁面特殊動畫
+    <>
+      <Stack.Navigator
+        id={undefined}
+        initialRouteName="Main"
+        screenOptions={{
+          headerStyle: {backgroundColor: '#6200ee'},
+          headerTintColor: '#fff',
+          headerTitleStyle: {fontWeight: 'bold'},
+          // 🎨 優化導航動畫
           transitionSpec: {
             open: {
               animation: 'timing',
               config: {
-                duration: 400,
-                easing: require('react-native').Easing.bezier(0.4, 0.0, 0.2, 1),
+                duration: 300,
+                easing: require('react-native').Easing.bezier(
+                  0.25,
+                  0.1,
+                  0.25,
+                  1,
+                ),
               },
             },
             close: {
               animation: 'timing',
               config: {
-                duration: 300,
-                easing: require('react-native').Easing.bezier(0.4, 0.0, 0.2, 1),
+                duration: 250,
+                easing: require('react-native').Easing.bezier(
+                  0.25,
+                  0.1,
+                  0.25,
+                  1,
+                ),
               },
             },
           },
-          // 🎭 優雅的縮放過渡效果
-          cardStyleInterpolator: ({current}) => {
+          // 🎭 優雅的面板過渡
+          cardStyleInterpolator: ({current, layouts}) => {
             return {
               cardStyle: {
                 transform: [
                   {
-                    scale: current.progress.interpolate({
+                    translateX: current.progress.interpolate({
                       inputRange: [0, 1],
-                      outputRange: [0.85, 1],
+                      outputRange: [layouts.screen.width, 0],
                     }),
                   },
                 ],
                 opacity: current.progress.interpolate({
                   inputRange: [0, 1],
-                  outputRange: [0.6, 1],
+                  outputRange: [0.8, 1],
                 }),
               },
               overlayStyle: {
                 opacity: current.progress.interpolate({
                   inputRange: [0, 1],
-                  outputRange: [0, 0.3],
+                  outputRange: [0, 0.5],
                 }),
               },
             };
           },
-        }}
-      />
-    </Stack.Navigator>
+          // 🚀 更快的響應
+          gestureEnabled: true,
+          gestureDirection: 'horizontal',
+          gestureResponseDistance: 50,
+          gestureVelocityImpact: 0.3,
+        }}>
+        {/* 這裡用 TabNavigator 作為主要畫面 */}
+        <Stack.Screen
+          name="Main"
+          component={TabNavigator}
+          options={{headerShown: false}}
+        />
+        <Stack.Screen
+          name="Search"
+          component={SearchScreen}
+          options={{headerShown: false}}
+        />
+        <Stack.Screen
+          name="HotelDetailScreen"
+          component={HotelDetailScreen}
+          options={{
+            headerShown: false,
+            gestureEnabled: false, // 禁用滑動返回手勢
+          }}
+        />
+        <Stack.Screen
+          name="BookingScreen"
+          component={BookingScreen}
+          options={{
+            headerShown: false,
+            gestureEnabled: false, // 禁用滑動返回手勢
+          }}
+        />
+        <Stack.Screen
+          name="BookingFormScreen"
+          component={BookingFormScreen}
+          options={{headerShown: false}}
+        />
+        <Stack.Screen
+          name="NearbyMapScreen"
+          component={NearbyMapScreen}
+          options={{headerShown: false}}
+        />
+        <Stack.Screen
+          name="Auth"
+          component={AuthScreen}
+          options={{
+            title: '登入與註冊',
+            headerShown: true,
+            headerStyle: {
+              backgroundColor: '#FFFFFF',
+              height: 42,
+            },
+            headerTitleStyle: {
+              fontFamily: 'Noto Sans TC',
+              fontWeight: '700',
+              fontSize: 16,
+              textAlign: 'center',
+            },
+            headerTintColor: '#000000',
+            // 🎨 Auth 頁面特殊動畫
+            transitionSpec: {
+              open: {
+                animation: 'timing',
+                config: {
+                  duration: 400,
+                  easing: require('react-native').Easing.bezier(
+                    0.4,
+                    0.0,
+                    0.2,
+                    1,
+                  ),
+                },
+              },
+              close: {
+                animation: 'timing',
+                config: {
+                  duration: 300,
+                  easing: require('react-native').Easing.bezier(
+                    0.4,
+                    0.0,
+                    0.2,
+                    1,
+                  ),
+                },
+              },
+            },
+            // 🎭 優雅的縮放過渡效果
+            cardStyleInterpolator: ({current}) => {
+              return {
+                cardStyle: {
+                  transform: [
+                    {
+                      scale: current.progress.interpolate({
+                        inputRange: [0, 1],
+                        outputRange: [0.85, 1],
+                      }),
+                    },
+                  ],
+                  opacity: current.progress.interpolate({
+                    inputRange: [0, 1],
+                    outputRange: [0.6, 1],
+                  }),
+                },
+                overlayStyle: {
+                  opacity: current.progress.interpolate({
+                    inputRange: [0, 1],
+                    outputRange: [0, 0.3],
+                  }),
+                },
+              };
+            },
+          }}
+        />
+      </Stack.Navigator>
+
+      {/* 全局 Modal - 確保在最上層顯示 */}
+      {activeModal === 'welcome' && <WelcomeModal />}
+    </>
   );
 };
 
