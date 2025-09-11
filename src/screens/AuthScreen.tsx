@@ -248,7 +248,7 @@ const AuthScreen = () => {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
       <ScrollView
         style={styles.content}
         contentContainerStyle={styles.scrollContent}
