@@ -24,7 +24,7 @@ const LocationModal = () => {
     useNavigation<StackNavigationProp<RootStackParamList, 'Search'>>();
   const {addKeyword, history, clearHistory} = useSearchHistory();
   const {setKeyword, condition} = useSearchCondition();
-  const {address, error, openSettings, shouldShowSettings} =
+  const {address, error, openSettings, shouldShowSettings, getLocation} =
     useCurrentLocation();
 
   const handleSearch = (text: string) => {
@@ -49,6 +49,9 @@ const LocationModal = () => {
             ]
           : [{text: '確定'}],
       );
+    } else {
+      // 如果還沒有位置資訊，則請求位置
+      getLocation();
     }
   };
 

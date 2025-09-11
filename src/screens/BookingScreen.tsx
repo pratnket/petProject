@@ -391,8 +391,20 @@ const BookingScreen = ({route, navigation}) => {
     if (slot) {
       setSelectedSlot(getSlotWithEndtime(slot, plan?.hour));
       setSelectedIndex(0);
+    } else {
+      // 如果選中的日期沒有時段，嘗試使用第一個可用的日期
+      const availableDates = Object.keys(allTimeSlots);
+      if (availableDates.length > 0) {
+        const firstAvailableDate = availableDates[0];
+        const firstSlot = allTimeSlots[firstAvailableDate]?.[0];
+        if (firstSlot) {
+          setSelectedDate(firstAvailableDate);
+          setSelectedSlot(getSlotWithEndtime(firstSlot, plan?.hour));
+          setSelectedIndex(0);
+        }
+      }
     }
-  }, [selectedDate]);
+  }, [selectedDate, plan?.hour]);
 
   const openInGoogleMaps = () => {
     const url = `https://www.google.com/maps/dir/?api=1&destination=${hotel.address}`;
