@@ -6,7 +6,9 @@ import {
   TouchableOpacity,
   ScrollView,
   Animated,
+  Platform,
 } from 'react-native';
+import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {useModal} from '../context/ModalContext';
 import {useNavigation} from '@react-navigation/native';
@@ -23,6 +25,7 @@ type WelcomeModalNavigationProp = StackNavigationProp<
 const WelcomeModal = () => {
   const {closeModal, activeModal} = useModal();
   const navigation = useNavigation<WelcomeModalNavigationProp>();
+  const insets = useSafeAreaInsets();
   const fadeAnim = useRef(new Animated.Value(1)).current;
   const scaleAnim = useRef(new Animated.Value(1)).current;
 
@@ -50,6 +53,7 @@ const WelcomeModal = () => {
   };
 
   const handleClose = async () => {
+    console.log('🔴 關閉按鈕被點擊');
     // 記錄用戶已經看過歡迎Modal
     try {
       await AsyncStorage.setItem('hasSeenWelcome', 'true');
@@ -94,7 +98,13 @@ const WelcomeModal = () => {
         ]}>
         {/* 關閉按鈕 */}
         <TouchableOpacity
-          style={styles.closeButton}
+          style={[
+            styles.closeButton,
+            {
+              top: insets.top + 10, // 使用安全區域頂部距離
+              right: insets.right + 20, // 使用安全區域右側距離
+            },
+          ]}
           onPress={handleClose}
           disabled={false}>
           <Text style={styles.closeButtonText}>✕</Text>
@@ -176,18 +186,17 @@ const styles = StyleSheet.create({
   },
   closeButton: {
     position: 'absolute',
-    top: 16,
-    right: 16,
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: 'rgba(0, 0, 0, 0.1)',
+    width: 44, // 增加觸摸區域
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: 'rgba(0, 0, 0, 0.2)',
     justifyContent: 'center',
     alignItems: 'center',
-    zIndex: 1001,
+    zIndex: 10001, // 提高 zIndex
+    elevation: 10001, // Android elevation
   },
   closeButtonText: {
-    fontSize: 18,
+    fontSize: 20,
     color: '#333',
     fontWeight: 'bold',
   },

@@ -1,6 +1,7 @@
 import React, {useEffect} from 'react';
-import {Platform, SafeAreaView, StyleSheet} from 'react-native';
+import {Platform, StyleSheet} from 'react-native';
 import {NavigationContainer} from '@react-navigation/native';
+import {SafeAreaProvider} from 'react-native-safe-area-context';
 import MainNavigator from './navigation/MainNavigator';
 import Providers from './providers/Providers';
 
@@ -13,13 +14,13 @@ const App = () => {
   }, []);
 
   return (
-    <Providers>
-      <NavigationContainer>
-        <SafeAreaView style={styles.container}>
+    <SafeAreaProvider>
+      <Providers>
+        <NavigationContainer>
           <MainNavigator />
-        </SafeAreaView>
-      </NavigationContainer>
-    </Providers>
+        </NavigationContainer>
+      </Providers>
+    </SafeAreaProvider>
   );
 };
 
