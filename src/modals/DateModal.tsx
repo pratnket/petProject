@@ -1,6 +1,7 @@
 import React from 'react';
 import {View, Text, StyleSheet, TouchableOpacity} from 'react-native';
 import ModalWrapper from '../components/common/ModalWrapper';
+import HeaderWrapper from '../components/common/HeaderWrapper';
 import {useModal} from '../context/ModalContext';
 import {useSearchCondition} from '../context/SearchConditionContext';
 import {DateRangePickerComponent} from '../components/common/DateRangePicker';
@@ -17,8 +18,8 @@ const DateModal = () => {
   };
 
   return (
-    <ModalWrapper style={styles.fullScreen}>
-      <View style={styles.header}>
+    <ModalWrapper style={styles.fullScreen} pageType="dateModal">
+      <HeaderWrapper pageType="dateModal" style={styles.header}>
         <TouchableOpacity onPress={closeModal} style={styles.backButton}>
           <Icon name="arrow-back" size={24} color="#333" />
         </TouchableOpacity>
@@ -26,7 +27,7 @@ const DateModal = () => {
           <Text style={styles.title}>選擇日期</Text>
         </View>
         <View style={styles.rightSpace} />
-      </View>
+      </HeaderWrapper>
 
       <View style={styles.content}>
         <DateRangePickerComponent onRangeSelected={handleRangeSelected} />

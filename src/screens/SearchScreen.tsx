@@ -1,6 +1,7 @@
 import React, {useEffect, useState} from 'react';
 import {View, StyleSheet} from 'react-native';
 import PageWrapper from '../components/common/PageWrapper';
+import HeaderWrapper from '../components/common/HeaderWrapper';
 import {useNavigation, useRoute} from '@react-navigation/native'; // 正確導入 useRoute
 import {StackNavigationProp} from '@react-navigation/stack';
 import {RouteProp} from '@react-navigation/native'; // 正確導入 RouteProp
@@ -46,8 +47,8 @@ const SearchScreen = () => {
   };
 
   return (
-    <PageWrapper style={styles.container}>
-      <View style={styles.header}>
+    <PageWrapper pageType="search" style={styles.container}>
+      <HeaderWrapper pageType="search" style={styles.header}>
         <SearchBar
           value={searchKeyword}
           onChangeText={setSearchKeyword}
@@ -58,7 +59,7 @@ const SearchScreen = () => {
           showSearchIcon={false}
         />
         <FilterBar />
-      </View>
+      </HeaderWrapper>
       <View style={styles.listArea}>
         <HotelList />
       </View>
@@ -72,8 +73,6 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-start',
   },
   header: {
-    paddingHorizontal: 0,
-    paddingVertical: 8,
     backgroundColor: '#fff',
   },
   listArea: {

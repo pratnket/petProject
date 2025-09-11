@@ -1,12 +1,13 @@
 import React from 'react';
 import {View, StyleSheet, ViewStyle} from 'react-native';
 import {SafeAreaView, Edge} from 'react-native-safe-area-context';
+import {SafeAreaConfig, PAGE_CONFIGS, PageType} from './SafeAreaConfig';
 
 interface ModalWrapperProps {
   children: React.ReactNode;
   style?: ViewStyle;
-  backgroundColor?: string;
-  edges?: Edge[];
+  pageType?: PageType;
+  config?: Partial<SafeAreaConfig>;
 }
 
 /**
@@ -16,13 +17,19 @@ interface ModalWrapperProps {
 const ModalWrapper: React.FC<ModalWrapperProps> = ({
   children,
   style,
-  backgroundColor = '#fff',
-  edges = ['top', 'bottom'],
+  pageType = 'modal',
+  config = {},
 }) => {
+  const pageConfig = {...PAGE_CONFIGS[pageType], ...config};
+
   return (
     <SafeAreaView
-      style={[styles.fullScreen, {backgroundColor}, style]}
-      edges={edges}>
+      style={[
+        styles.fullScreen,
+        {backgroundColor: pageConfig.backgroundColor},
+        style,
+      ]}
+      edges={pageConfig.edges}>
       {children}
     </SafeAreaView>
   );

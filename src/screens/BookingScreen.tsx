@@ -21,6 +21,7 @@ import TimePriceSelector from '../components/common/TimePriceSelector';
 import dayjs from 'dayjs';
 // 添加 PageWrapper 導入
 import PageWrapper from '../components/common/PageWrapper';
+import HeaderWrapper from '../components/common/HeaderWrapper';
 
 // 錯誤邊界組件
 class ErrorBoundary extends React.Component<
@@ -456,21 +457,21 @@ const BookingScreen = ({route, navigation}) => {
   };
 
   return (
-    <PageWrapper>
+    <PageWrapper pageType="booking">
       <ErrorBoundary>
         <ScrollView
           style={styles.scrollView}
           contentContainerStyle={styles.container}
           showsVerticalScrollIndicator={false}>
           {/* 🔙 返回按鈕 */}
-          <View style={styles.header}>
+          <HeaderWrapper pageType="booking" style={styles.header}>
             <TouchableOpacity
               onPress={() => navigation.goBack()}
               style={styles.backButton}>
               <Icon name="arrow-back" size={24} color="#555" />
             </TouchableOpacity>
             <Text style={styles.headerTitle}>{hotel?.name || '未知旅館'}</Text>
-          </View>
+          </HeaderWrapper>
 
           {/* 套餐卡片 */}
           <View style={styles.planCard}>
@@ -600,7 +601,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     paddingBottom: 80,
   },
-  header: {flexDirection: 'row', alignItems: 'center', marginBottom: 16},
+  header: {flexDirection: 'row', alignItems: 'center'},
   backButton: {padding: 4, marginRight: 8},
   headerTitle: {fontSize: 18, fontWeight: 'bold'},
   planCard: {

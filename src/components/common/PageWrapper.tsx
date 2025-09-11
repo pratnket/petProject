@@ -1,14 +1,13 @@
 import React from 'react';
 import {StyleSheet, ViewStyle, StatusBar} from 'react-native';
 import {SafeAreaView, Edge} from 'react-native-safe-area-context';
+import {SafeAreaConfig, PAGE_CONFIGS, PageType} from './SafeAreaConfig';
 
 interface PageWrapperProps {
   children: React.ReactNode;
   style?: ViewStyle;
-  backgroundColor?: string;
-  statusBarStyle?: 'default' | 'light-content' | 'dark-content';
-  edges?: Edge[];
-  showStatusBar?: boolean;
+  pageType?: PageType;
+  config?: Partial<SafeAreaConfig>;
 }
 
 /**
@@ -18,19 +17,23 @@ interface PageWrapperProps {
 const PageWrapper: React.FC<PageWrapperProps> = ({
   children,
   style,
-  backgroundColor = '#fff',
-  statusBarStyle = 'dark-content',
-  edges = ['top', 'bottom'],
-  showStatusBar = true,
+  pageType = 'default',
+  config = {},
 }) => {
+  const pageConfig = {...PAGE_CONFIGS[pageType], ...config};
+
   return (
     <SafeAreaView
-      style={[styles.container, {backgroundColor}, style]}
-      edges={edges}>
-      {showStatusBar && (
+      style={[
+        styles.container,
+        {backgroundColor: pageConfig.backgroundColor},
+        style,
+      ]}
+      edges={pageConfig.edges}>
+      {pageConfig.showStatusBar && (
         <StatusBar
-          barStyle={statusBarStyle}
-          backgroundColor={backgroundColor}
+          barStyle={pageConfig.statusBarStyle}
+          backgroundColor={pageConfig.backgroundColor}
         />
       )}
       {children}
