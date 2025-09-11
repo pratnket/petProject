@@ -19,6 +19,8 @@ import MapViewComponent from '../components/common/MapViewComponent';
 import DateSelector from '../components/common/DateSelector';
 import TimePriceSelector from '../components/common/TimePriceSelector';
 import dayjs from 'dayjs';
+// 添加 PageWrapper 導入
+import PageWrapper from '../components/common/PageWrapper';
 
 // 錯誤邊界組件
 class ErrorBoundary extends React.Component<
@@ -454,130 +456,136 @@ const BookingScreen = ({route, navigation}) => {
   };
 
   return (
-    <ErrorBoundary>
-      <ScrollView
-        style={styles.scrollView}
-        contentContainerStyle={styles.container}
-        showsVerticalScrollIndicator={false}>
-        {/* 🔙 返回按鈕 */}
-        <View style={styles.header}>
-          <TouchableOpacity
-            onPress={() => navigation.goBack()}
-            style={styles.backButton}>
-            <Icon name="arrow-back" size={24} color="#555" />
-          </TouchableOpacity>
-          <Text style={styles.headerTitle}>{hotel?.name || '未知旅館'}</Text>
-        </View>
-
-        {/* 套餐卡片 */}
-        <View style={styles.planCard}>
-          {loading && !hasError && (
-            <ActivityIndicator
-              style={StyleSheet.absoluteFill}
-              size="small"
-              color="#999"
-            />
-          )}
-          <Image
-            source={
-              hasError
-                ? getImageSource(ImageAssets.error)
-                : getImageSource(hotel.coverImage)
-            }
-            style={styles.image}
-            onLoadStart={() => setLoading(true)}
-            onLoadEnd={() => setLoading(false)}
-            onError={() => {
-              setHasError(true);
-              setLoading(false);
-            }}
-          />
-          <View style={styles.planText}>
-            <Text style={styles.planLabel}>{plan.label}</Text>
-            <Text style={styles.time}>
-              開始
-              {selectedSlot?.selltime
-                ? dayjs(selectedSlot?.selltime).format('MM月DD日 HH:mm')
-                : '—'}
-            </Text>
-            <Text style={styles.time}>
-              結束
-              {selectedSlot?.selltime
-                ? dayjs(selectedSlot?.selltime)
-                    .add(plan?.hour, 'hour')
-                    .format('MM月DD日 HH:mm')
-                : '—'}
-            </Text>
+    <PageWrapper>
+      <ErrorBoundary>
+        <ScrollView
+          style={styles.scrollView}
+          contentContainerStyle={styles.container}
+          showsVerticalScrollIndicator={false}>
+          {/* 🔙 返回按鈕 */}
+          <View style={styles.header}>
+            <TouchableOpacity
+              onPress={() => navigation.goBack()}
+              style={styles.backButton}>
+              <Icon name="arrow-back" size={24} color="#555" />
+            </TouchableOpacity>
+            <Text style={styles.headerTitle}>{hotel?.name || '未知旅館'}</Text>
           </View>
-        </View>
 
-        <View style={styles.section}>
-          <Text style={styles.label}>地址</Text>
-          <Text>{hotel.address}</Text>
-
-          {/* 地圖區塊 */}
-          {hotel.lat && hotel.lng && (
-            <MapViewComponent
-              lat={hotel.lat}
-              lng={hotel.lng}
-              title={hotel.name}
-              description={hotel.address}
-              containerStyle={styles.mapContainer}
-              onPressMarker={openInGoogleMaps} // ✅ 傳入點擊事件
+          {/* 套餐卡片 */}
+          <View style={styles.planCard}>
+            {loading && !hasError && (
+              <ActivityIndicator
+                style={StyleSheet.absoluteFill}
+                size="small"
+                color="#999"
+              />
+            )}
+            <Image
+              source={
+                hasError
+                  ? getImageSource(ImageAssets.error)
+                  : getImageSource(hotel.coverImage)
+              }
+              style={styles.image}
+              onLoadStart={() => setLoading(true)}
+              onLoadEnd={() => setLoading(false)}
+              onError={() => {
+                setHasError(true);
+                setLoading(false);
+              }}
             />
-          )}
-
-          {/* 距離顯示 */}
-          {userLocation && distanceText && (
-            <Text style={styles.distanceText}>與你相距：約 {distanceText}</Text>
-          )}
-        </View>
-
-        <View style={styles.section}>
-          <Text style={styles.label}>商品內容</Text>
-          {hotel.description.map((line, idx) => (
-            <Text key={idx}>• {line}</Text>
-          ))}
-        </View>
-
-        <View style={styles.section}>
-          <Text style={styles.label}>選擇日期</Text>
-          <DateSelector
-            selectedDate={selectedDate}
-            onDateSelect={date => {
-              setSelectedDate(date);
-              const slot = allTimeSlots[date]?.[0];
-              setSelectedIndex(0);
-              setSelectedSlot(getSlotWithEndtime(slot, plan?.hour));
-            }}
-            availableDates={Object.keys(allTimeSlots)} // ⬅️ 加入這一行
-          />
-
-          <TimePriceSelector
-            selectedDate={selectedDate} // 例如 '2025-07-25'
-            timeSlots={allTimeSlots} // 所有 7 日範圍時段 + 價格
-            selectedIndex={selectedIndex} // 當前選中的時間索引
-            onSelect={idx => {
-              setSelectedIndex(idx);
-              const slot = allTimeSlots[selectedDate]?.[idx];
-              setSelectedSlot(getSlotWithEndtime(slot, plan?.hour));
-            }}
-          />
-        </View>
-        {/* 新增吸底結帳區塊 */}
-        <View style={styles.checkoutBar}>
-          <View>
-            <Text style={styles.checkoutLabel}>結帳金額</Text>
-            <Text style={styles.checkoutAmount}>
-              TWD {selectedSlot?.price ?? '0'}
-            </Text>
+            <View style={styles.planText}>
+              <Text style={styles.planLabel}>{plan.label}</Text>
+              <Text style={styles.time}>
+                開始
+                {selectedSlot?.selltime
+                  ? dayjs(selectedSlot?.selltime).format('MM月DD日 HH:mm')
+                  : '—'}
+              </Text>
+              <Text style={styles.time}>
+                結束
+                {selectedSlot?.selltime
+                  ? dayjs(selectedSlot?.selltime)
+                      .add(plan?.hour, 'hour')
+                      .format('MM月DD日 HH:mm')
+                  : '—'}
+              </Text>
+            </View>
           </View>
-          <TouchableOpacity style={styles.checkoutButton} onPress={handlePress}>
-            <Text style={styles.checkoutButtonText}>立即預訂</Text>
-          </TouchableOpacity>
-        </View>
-      </ScrollView>
-    </ErrorBoundary>
+
+          <View style={styles.section}>
+            <Text style={styles.label}>地址</Text>
+            <Text>{hotel.address}</Text>
+
+            {/* 地圖區塊 */}
+            {hotel.lat && hotel.lng && (
+              <MapViewComponent
+                lat={hotel.lat}
+                lng={hotel.lng}
+                title={hotel.name}
+                description={hotel.address}
+                containerStyle={styles.mapContainer}
+                onPressMarker={openInGoogleMaps} // ✅ 傳入點擊事件
+              />
+            )}
+
+            {/* 距離顯示 */}
+            {userLocation && distanceText && (
+              <Text style={styles.distanceText}>
+                與你相距：約 {distanceText}
+              </Text>
+            )}
+          </View>
+
+          <View style={styles.section}>
+            <Text style={styles.label}>商品內容</Text>
+            {hotel.description.map((line, idx) => (
+              <Text key={idx}>• {line}</Text>
+            ))}
+          </View>
+
+          <View style={styles.section}>
+            <Text style={styles.label}>選擇日期</Text>
+            <DateSelector
+              selectedDate={selectedDate}
+              onDateSelect={date => {
+                setSelectedDate(date);
+                const slot = allTimeSlots[date]?.[0];
+                setSelectedIndex(0);
+                setSelectedSlot(getSlotWithEndtime(slot, plan?.hour));
+              }}
+              availableDates={Object.keys(allTimeSlots)} // ⬅️ 加入這一行
+            />
+
+            <TimePriceSelector
+              selectedDate={selectedDate} // 例如 '2025-07-25'
+              timeSlots={allTimeSlots} // 所有 7 日範圍時段 + 價格
+              selectedIndex={selectedIndex} // 當前選中的時間索引
+              onSelect={idx => {
+                setSelectedIndex(idx);
+                const slot = allTimeSlots[selectedDate]?.[idx];
+                setSelectedSlot(getSlotWithEndtime(slot, plan?.hour));
+              }}
+            />
+          </View>
+          {/* 新增吸底結帳區塊 */}
+          <View style={styles.checkoutBar}>
+            <View>
+              <Text style={styles.checkoutLabel}>結帳金額</Text>
+              <Text style={styles.checkoutAmount}>
+                TWD {selectedSlot?.price ?? '0'}
+              </Text>
+            </View>
+            <TouchableOpacity
+              style={styles.checkoutButton}
+              onPress={handlePress}>
+              <Text style={styles.checkoutButtonText}>立即預訂</Text>
+            </TouchableOpacity>
+          </View>
+        </ScrollView>
+      </ErrorBoundary>
+    </PageWrapper>
   );
 };
 
