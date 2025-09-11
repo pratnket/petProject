@@ -15,6 +15,8 @@ interface AppleMapViewProps {
   scrollEnabled?: boolean;
   showsUserLocation?: boolean;
   showsMyLocationButton?: boolean;
+  onMarkerPress?: (marker: any) => void;
+  style?: any;
 }
 
 const AppleMapView: React.FC<AppleMapViewProps> = ({
@@ -25,6 +27,8 @@ const AppleMapView: React.FC<AppleMapViewProps> = ({
   scrollEnabled = true,
   showsUserLocation = false,
   showsMyLocationButton = false,
+  onMarkerPress,
+  style,
 }) => {
   const region = {
     latitude,
@@ -35,7 +39,7 @@ const AppleMapView: React.FC<AppleMapViewProps> = ({
 
   return (
     <MapView
-      style={styles.map}
+      style={style || styles.map}
       initialRegion={region}
       zoomEnabled={zoomEnabled}
       scrollEnabled={scrollEnabled}
@@ -60,6 +64,7 @@ const AppleMapView: React.FC<AppleMapViewProps> = ({
           }}
           title={marker.title}
           description={marker.description}
+          onPress={() => onMarkerPress?.(marker)}
         />
       ))}
     </MapView>

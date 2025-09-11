@@ -16,6 +16,40 @@ import {useModal} from '../../context/ModalContext';
 // modals
 import SelectPlanModal from '../../modals/SelectPlanModal';
 
+// 錯誤邊界組件
+class ErrorBoundary extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = { hasError: false };
+  }
+
+  static getDerivedStateFromError(error) {
+    return { hasError: true };
+  }
+
+  componentDidCatch(error, errorInfo) {
+    console.error('HotelDetail Error:', error, errorInfo);
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <View style={styles.errorContainer}>
+          <Text style={styles.errorText}>載入旅館詳情時發生錯誤</Text>
+          <TouchableOpacity 
+            style={styles.retryButton}
+            onPress={() => this.setState({ hasError: false })}
+          >
+            <Text style={styles.retryText}>重試</Text>
+          </TouchableOpacity>
+        </View>
+      );
+    }
+
+    return this.props.children;
+  }
+}
+
 const screenWidth = Dimensions.get('window').width;
 
 const HotelDetail = ({route, navigation}) => {
@@ -25,10 +59,11 @@ const HotelDetail = ({route, navigation}) => {
   const [selectedPlan, setSelectedPlan] = useState(null);
 
   const getImageSource = img => {
+    if (!img) return require('../../assets/error.png'); // 預設圖片
     return typeof img === 'number' ? img : {uri: img};
   };
 
-  const images = hotel.images ?? (hotel.image ? [hotel.image] : []);
+  const images = hotel?.images ?? (hotel?.image ? [hotel.image] : []);
   const [activeIndex, setActiveIndex] = useState(0);
 
   const handleScroll = e => {
@@ -46,96 +81,98 @@ const HotelDetail = ({route, navigation}) => {
   };
 
   return (
-    <ScrollView style={styles.container}>
-      <View>
-        <FlatList
-          horizontal
-          pagingEnabled
-          data={images}
-          keyExtractor={(_, index) => index.toString()}
-          renderItem={({item}) => (
-            <Image source={getImageSource(item)} style={styles.image} />
-          )}
-          showsHorizontalScrollIndicator={false}
-          onScroll={handleScroll}
-          scrollEventThrottle={16}
-        />
+    <ErrorBoundary>
+      <ScrollView style={styles.container}>
+        <View>
+          <FlatList
+            horizontal
+            pagingEnabled
+            data={images}
+            keyExtractor={(_, index) => index.toString()}
+            renderItem={({item}) => (
+              <Image source={getImageSource(item)} style={styles.image} />
+            )}
+            showsHorizontalScrollIndicator={false}
+            onScroll={handleScroll}
+            scrollEventThrottle={16}
+          />
 
-        {/* Indicator dots */}
-        <View style={styles.dotsContainer}>
-          {images.map((_, index) => (
-            <View
-              key={index}
-              style={[styles.dot, activeIndex === index && styles.activeDot]}
-            />
-          ))}
-        </View>
+          {/* Indicator dots */}
+          <View style={styles.dotsContainer}>
+            {images.map((_, index) => (
+              <View
+                key={index}
+                style={[styles.dot, activeIndex === index && styles.activeDot]}
+              />
+            ))}
+          </View>
 
-        {/* Top bar with back, heart, share */}
-        <View style={styles.topBar}>
-          <TouchableOpacity onPress={() => navigation.goBack()}>
-            <Icon name="arrow-back" size={20} color="#fff" />
-          </TouchableOpacity>
-          <View style={{flexDirection: 'row', gap: 12}}>
-            <TouchableOpacity>
-              <Icon name="heart-outline" size={20} color="#fff" />
+          {/* Top bar with back, heart, share */}
+          <View style={styles.topBar}>
+            <TouchableOpacity onPress={() => navigation.goBack()}>
+              <Icon name="arrow-back" size={20} color="#fff" />
             </TouchableOpacity>
-            <TouchableOpacity>
-              <Icon name="share-social-outline" size={20} color="#fff" />
-            </TouchableOpacity>
+            <View style={{flexDirection: 'row', gap: 12}}>
+              <TouchableOpacity>
+                <Icon name="heart-outline" size={20} color="#fff" />
+              </TouchableOpacity>
+              <TouchableOpacity>
+                <Icon name="share-social-outline" size={20} color="#fff" />
+              </TouchableOpacity>
+            </View>
           </View>
         </View>
-      </View>
 
-      <View style={styles.content}>
-        <Text style={styles.title}>{hotel.name}</Text>
+        <View style={styles.content}>
+          <Text style={styles.title}>{hotel?.name || '未知旅館'}</Text>
 
-        <View style={styles.ratingRow}>
-          {[...Array(5)].map((_, i) => (
-            <Icon key={i} name="star" size={18} color="#facc15" />
-          ))}
-          <Text style={styles.ratingText}>5.0</Text>
+          <View style={styles.ratingRow}>
+            {[...Array(5)].map((_, i) => (
+              <Icon key={i} name="star" size={18} color="#facc15" />
+            ))}
+            <Text style={styles.ratingText}>5.0</Text>
+          </View>
+
+          <View style={styles.addressRow}>
+            <Icon name="location" size={16} color="#6b7280" />
+            <Text style={styles.addressText}>{hotel?.address || '地址未知'}</Text>
+          </View>
+
+          <Text style={styles.sectionTitle}>商品內容</Text>
+          {hotel?.description?.map((item, idx) => (
+            <Text key={idx} style={styles.bullet}>
+              • {item}
+            </Text>
+          )) || <Text style={styles.bullet}>• 暫無描述</Text>}
+
+          <Text style={styles.sectionTitle}>設施</Text>
+          <View style={styles.facilities}>
+            <Facility icon="restaurant" label="餐廳" />
+            <Facility icon="tv" label="Netflix" />
+            <Facility icon="snow" label="冷氣" />
+            <Facility icon="washer" label="洗衣機" />
+            <Facility icon="sunny" label="陽台" />
+            <Facility icon="wifi" label="免費網路" />
+          </View>
+
+          <View style={styles.priceRow}>
+            <Text style={styles.priceText}>
+              {hotel?.price || '價格未知'} <Text style={styles.sub}>含稅</Text>
+            </Text>
+          </View>
+
+          <TouchableOpacity
+            style={styles.button}
+            onPress={() => openModal('selectPlan')}>
+            <Text style={styles.buttonText}>選擇方案</Text>
+          </TouchableOpacity>
+
+          {activeModal === 'selectPlan' && (
+            <SelectPlanModal onSelect={handlePlanSelected} plans={plans} />
+          )}
         </View>
-
-        <View style={styles.addressRow}>
-          <Icon name="location" size={16} color="#6b7280" />
-          <Text style={styles.addressText}>{hotel.address}</Text>
-        </View>
-
-        <Text style={styles.sectionTitle}>商品內容</Text>
-        {hotel.description.map((item, idx) => (
-          <Text key={idx} style={styles.bullet}>
-            • {item}
-          </Text>
-        ))}
-
-        <Text style={styles.sectionTitle}>設施</Text>
-        <View style={styles.facilities}>
-          <Facility icon="restaurant" label="餐廳" />
-          <Facility icon="tv" label="Netflix" />
-          <Facility icon="snow" label="冷氣" />
-          <Facility icon="washer" label="洗衣機" />
-          <Facility icon="sunny" label="陽台" />
-          <Facility icon="wifi" label="免費網路" />
-        </View>
-
-        <View style={styles.priceRow}>
-          <Text style={styles.priceText}>
-            {hotel.price} <Text style={styles.sub}>含稅</Text>
-          </Text>
-        </View>
-
-        <TouchableOpacity
-          style={styles.button}
-          onPress={() => openModal('selectPlan')}>
-          <Text style={styles.buttonText}>選擇方案</Text>
-        </TouchableOpacity>
-
-        {activeModal === 'selectPlan' && (
-          <SelectPlanModal onSelect={handlePlanSelected} plans={plans} />
-        )}
-      </View>
-    </ScrollView>
+      </ScrollView>
+    </ErrorBoundary>
   );
 };
 
@@ -210,6 +247,29 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   buttonText: {color: 'white', fontWeight: 'bold'},
+  errorContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+    backgroundColor: '#fff',
+  },
+  errorText: {
+    fontSize: 16,
+    color: '#ef4444',
+    textAlign: 'center',
+    marginBottom: 20,
+  },
+  retryButton: {
+    backgroundColor: '#3b82f6',
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderRadius: 8,
+  },
+  retryText: {
+    color: 'white',
+    fontWeight: 'bold',
+  },
 });
 
 export default HotelDetail;

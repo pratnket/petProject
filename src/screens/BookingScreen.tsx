@@ -20,6 +20,43 @@ import DateSelector from '../components/common/DateSelector';
 import TimePriceSelector from '../components/common/TimePriceSelector';
 import dayjs from 'dayjs';
 
+// 錯誤邊界組件
+class ErrorBoundary extends React.Component<
+  {children: React.ReactNode},
+  {hasError: boolean}
+> {
+  constructor(props: {children: React.ReactNode}) {
+    super(props);
+    this.state = { hasError: false };
+  }
+
+  static getDerivedStateFromError(error: any) {
+    return { hasError: true };
+  }
+
+  componentDidCatch(error: any, errorInfo: any) {
+    console.error('BookingScreen Error:', error, errorInfo);
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <View style={styles.errorContainer}>
+          <Text style={styles.errorText}>載入預訂頁面時發生錯誤</Text>
+          <TouchableOpacity 
+            style={styles.retryButton}
+            onPress={() => this.setState({ hasError: false })}
+          >
+            <Text style={styles.retryText}>重試</Text>
+          </TouchableOpacity>
+        </View>
+      );
+    }
+
+    return this.props.children;
+  }
+}
+
 // ✅ 輕量距離函式（Haversine）
 const getDistanceInKm = (lat1, lon1, lat2, lon2) => {
   const toRad = deg => (deg * Math.PI) / 180;
@@ -413,16 +450,17 @@ const BookingScreen = ({route, navigation}) => {
   };
 
   return (
-    <ScrollView contentContainerStyle={styles.container}>
-      {/* 🔙 返回按鈕 */}
-      <View style={styles.header}>
-        <TouchableOpacity
-          onPress={() => navigation.goBack()}
-          style={styles.backButton}>
-          <Icon name="arrow-back" size={24} color="#555" />
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>{hotel.name}</Text>
-      </View>
+    <ErrorBoundary>
+      <ScrollView contentContainerStyle={styles.container}>
+        {/* 🔙 返回按鈕 */}
+        <View style={styles.header}>
+          <TouchableOpacity
+            onPress={() => navigation.goBack()}
+            style={styles.backButton}>
+            <Icon name="arrow-back" size={24} color="#555" />
+          </TouchableOpacity>
+          <Text style={styles.headerTitle}>{hotel?.name || '未知旅館'}</Text>
+        </View>
 
       {/* 套餐卡片 */}
       <View style={styles.planCard}>
@@ -531,7 +569,8 @@ const BookingScreen = ({route, navigation}) => {
           <Text style={styles.checkoutButtonText}>立即預訂</Text>
         </TouchableOpacity>
       </View>
-    </ScrollView>
+      </ScrollView>
+    </ErrorBoundary>
   );
 };
 
@@ -591,5 +630,28 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontWeight: 'bold',
     fontSize: 16,
+  },
+  errorContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+    backgroundColor: '#fff',
+  },
+  errorText: {
+    fontSize: 16,
+    color: '#ef4444',
+    textAlign: 'center',
+    marginBottom: 20,
+  },
+  retryButton: {
+    backgroundColor: '#3b82f6',
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderRadius: 8,
+  },
+  retryText: {
+    color: 'white',
+    fontWeight: 'bold',
   },
 });

@@ -1,7 +1,7 @@
 import React, {useEffect, useState} from 'react';
 import MapView, {Marker, PROVIDER_GOOGLE} from 'react-native-maps';
-import {ViewStyle, Alert, Platform, PermissionsAndroid} from 'react-native';
-import Geolocation from 'react-native-geolocation-service';
+import {ViewStyle, Alert, Platform, PermissionsAndroid, Text, View} from 'react-native';
+import Geolocation from '@react-native-community/geolocation';
 
 interface GoogleMapViewProps {
   style?: ViewStyle;
@@ -44,18 +44,25 @@ const GoogleMapView: React.FC<GoogleMapViewProps> = ({
   useEffect(() => {
     const requestLocationPermission = async () => {
       try {
-        // 請求權限
-        const granted = await Geolocation.requestAuthorization('whenInUse');
-        console.log('權限請求結果:', granted);
-        
-        if (granted === 'granted') {
+        if (Platform.OS === 'android') {
+          const granted = await PermissionsAndroid.request(
+            PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
+          );
+          if (granted === PermissionsAndroid.RESULTS.GRANTED) {
+            setHasPermission(true);
+            if (useCurrentLocation) {
+              getCurrentLocation();
+            }
+          } else {
+            console.log('位置權限請求被拒絕');
+            setHasPermission(false);
+          }
+        } else {
+          // iOS 不需要額外權限請求，直接嘗試獲取位置
           setHasPermission(true);
           if (useCurrentLocation) {
             getCurrentLocation();
           }
-        } else {
-          console.log('位置權限請求被拒絕');
-          setHasPermission(false);
         }
       } catch (error) {
         console.error('位置權限請求失敗:', error);
@@ -107,55 +114,64 @@ const GoogleMapView: React.FC<GoogleMapViewProps> = ({
     onMarkerPress?.(marker);
   };
 
-  return (
-    <MapView
-      style={style || { flex: 1 }}
-      provider={PROVIDER_GOOGLE}
-      initialRegion={region}
-      onPress={handleMapPress}
-      showsUserLocation={useCurrentLocation && hasPermission}
-      showsMyLocationButton={useCurrentLocation && hasPermission}
-      showsCompass={true}
-      showsScale={true}
-      showsBuildings={true}
-      showsTraffic={false}
-      showsIndoors={true}
-      mapType="standard"
-      zoomEnabled={true}
-      scrollEnabled={true}
-      pitchEnabled={true}
-      rotateEnabled={true}
-      loadingEnabled={true}
-      loadingIndicatorColor="#666666"
-      loadingBackgroundColor="#eeeeee"
-    >
-      {/* 顯示所有標記 */}
-      {markers.map((marker, index) => (
-        <Marker
-          key={index}
-          coordinate={{
-            latitude: marker.latitude,
-            longitude: marker.longitude,
-          }}
-          title={marker.title}
-          description={marker.description}
-          onPress={() => handleMarkerPress(marker)}
-        />
-      ))}
-      
-      {/* 顯示當前位置標記（如果沒有使用 showsUserLocation） */}
-      {useCurrentLocation && currentLocation && !hasPermission && (
-        <Marker
-          coordinate={{
-            latitude: currentLocation.latitude,
-            longitude: currentLocation.longitude,
-          }}
-          title="您的位置"
-          pinColor="blue"
-        />
-      )}
-    </MapView>
-  );
+  try {
+    return (
+      <MapView
+        style={style || { flex: 1 }}
+        provider={PROVIDER_GOOGLE}
+        initialRegion={region}
+        onPress={handleMapPress}
+        showsUserLocation={useCurrentLocation && hasPermission}
+        showsMyLocationButton={useCurrentLocation && hasPermission}
+        showsCompass={true}
+        showsScale={true}
+        showsBuildings={true}
+        showsTraffic={false}
+        showsIndoors={true}
+        mapType="standard"
+        zoomEnabled={true}
+        scrollEnabled={true}
+        pitchEnabled={true}
+        rotateEnabled={true}
+        loadingEnabled={true}
+        loadingIndicatorColor="#666666"
+        loadingBackgroundColor="#eeeeee"
+      >
+        {/* 顯示所有標記 */}
+        {markers.map((marker, index) => (
+          <Marker
+            key={index}
+            coordinate={{
+              latitude: marker.latitude,
+              longitude: marker.longitude,
+            }}
+            title={marker.title}
+            description={marker.description}
+            onPress={() => handleMarkerPress(marker)}
+          />
+        ))}
+        
+        {/* 顯示當前位置標記（如果沒有使用 showsUserLocation） */}
+        {useCurrentLocation && currentLocation && !hasPermission && (
+          <Marker
+            coordinate={{
+              latitude: currentLocation.latitude,
+              longitude: currentLocation.longitude,
+            }}
+            title="您的位置"
+            pinColor="blue"
+          />
+        )}
+      </MapView>
+    );
+  } catch (error) {
+    console.error('地圖載入失敗:', error);
+    return (
+      <View style={[style || { flex: 1 }, { justifyContent: 'center', alignItems: 'center', backgroundColor: '#f0f0f0' }]}>
+        <Text style={{ color: '#666', fontSize: 16 }}>地圖載入失敗</Text>
+      </View>
+    );
+  }
 };
 
 export default GoogleMapView;
