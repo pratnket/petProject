@@ -420,9 +420,11 @@ const BookingScreen = ({route, navigation}) => {
         err => {
           console.warn('❌ 定位失敗', err.message);
         },
-        Platform.OS === 'android'
-          ? undefined // Android 使用預設較穩定
-          : {enableHighAccuracy: true, timeout: 10000, maximumAge: 5000},
+        {
+          enableHighAccuracy: true,
+          timeout: 15000,
+          maximumAge: 10000,
+        },
       );
     };
 
