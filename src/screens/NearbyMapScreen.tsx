@@ -2,6 +2,7 @@ import React from 'react';
 import {View, StyleSheet, Text, TouchableOpacity} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import UnifiedMapView from '../components/common/UnifiedMapView';
+import PageWrapper from '../components/safe-area/PageWrapper';
 
 type Hotel = {
   id: string;
@@ -80,37 +81,39 @@ const NearbyHotelMapScreen = () => {
   const navigation = useNavigation<any>();
 
   return (
-    <View style={styles.container}>
-      <View style={styles.mapHeader}>
-        <TouchableOpacity
-          style={styles.backButton}
-          onPress={() => navigation.goBack()}>
-          <Text style={styles.backButtonText}>← 返回</Text>
-        </TouchableOpacity>
-        <Text style={styles.mapTitle}>地圖檢視</Text>
+    <PageWrapper style={styles.container}>
+      <View style={styles.container}>
+        <View style={styles.mapHeader}>
+          <TouchableOpacity
+            style={styles.backButton}
+            onPress={() => navigation.goBack()}>
+            <Text style={styles.backButtonText}>← 返回</Text>
+          </TouchableOpacity>
+          <Text style={styles.mapTitle}>地圖檢視</Text>
+        </View>
+        <UnifiedMapView
+          latitude={24.14318483364294}
+          longitude={120.67568228601196}
+          zoom={15}
+          markers={hotels.map(hotel => ({
+            latitude: hotel.lat,
+            longitude: hotel.lng,
+            title: hotel.name,
+            description: hotel.address,
+          }))}
+          onMarkerPress={marker => {
+            console.log('標記被點擊:', marker);
+            // 可以在這裡添加標記點擊的處理邏輯
+          }}
+          onMapPress={location => {
+            console.log('地圖被點擊:', location);
+            // 可以在這裡添加地圖點擊的處理邏輯
+          }}
+          useCurrentLocation={false}
+          mapType="standard"
+          />
       </View>
-      <UnifiedMapView
-        latitude={24.14318483364294}
-        longitude={120.67568228601196}
-        zoom={15}
-        markers={hotels.map(hotel => ({
-          latitude: hotel.lat,
-          longitude: hotel.lng,
-          title: hotel.name,
-          description: hotel.address,
-        }))}
-        onMarkerPress={marker => {
-          console.log('標記被點擊:', marker);
-          // 可以在這裡添加標記點擊的處理邏輯
-        }}
-        onMapPress={location => {
-          console.log('地圖被點擊:', location);
-          // 可以在這裡添加地圖點擊的處理邏輯
-        }}
-        useCurrentLocation={false}
-        mapType="standard"
-      />
-    </View>
+    </PageWrapper>
   );
 };
 
