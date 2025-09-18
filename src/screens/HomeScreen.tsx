@@ -7,9 +7,11 @@ import {
   ActivityIndicator,
   Alert,
   Platform,
+  SafeAreaView,
 } from 'react-native';
 import PlatformImageBackground from '../components/PlatformImageBackground';
 import IconInput from '../components/PlatformIconInput';
+import CarouselBanner from '../components/common/CarouselBanner';
 import {useModal} from '../context/ModalContext';
 import {useSearchCondition} from '../context/SearchConditionContext';
 import {useSearchHistory} from '../context/SearchHistoryContext';
@@ -102,57 +104,49 @@ const HomeScreen: React.FC = () => {
 
   return (
     <View style={styles.container}>
-      <PlatformImageBackground
-        source={require('../assets/Background.jpg')}
-        src="/assets/Background.jpg">
-        <View style={styles.card}>
-          <IconInput
-            placeholder="你要去哪裡"
-            iconName="location-outline"
-            onPress={() => openModal('location')}
-            value={condition.keyword}
-          />
-          <View style={styles.row}>
-            <View style={styles.halfInput}>
-              <IconInput
-                placeholder="入住日期"
-                iconName="calendar-outline"
-                value={
-                  dateRange?.start ? formatDateWithWeekday(dateRange.start) : ''
-                }
-                onPress={() => openModal('date')}
-              />
+      {/* 輪播廣告背景 - 延伸到全螢幕，不受安全區域限制 */}
+      <CarouselBanner
+        height={300}
+        autoPlay={true}
+        autoPlayInterval={4000}
+        showIndicators={false}
+        onBannerPress={(banner) => {
+          console.log('廣告點擊:', banner);
+          // 這裡可以處理廣告點擊事件
+        }}
+      />
+
+      {/* 搜索卡片 - 絕對定位但考慮安全區域 */}
+      <SafeAreaView style={styles.safeAreaContainer} pointerEvents="box-none">
+        <View style={styles.searchCard} pointerEvents="auto">
+          <View style={styles.searchHeader}>
+            <TouchableOpacity 
+              style={styles.searchInput}
+              onPress={() => openModal('location')}
+              activeOpacity={0.7}>
+              <View style={styles.searchInputContent}>
+                <Text style={styles.searchPlaceholder}>
+                  {condition.keyword || '立即搜尋寵物旅館'}
+                </Text>
+              </View>
+            </TouchableOpacity>
+            
+          <TouchableOpacity 
+            style={styles.filterButton}
+            onPress={() => {
+              // 打開 LocationModal，顯示完整的搜索和篩選功能
+              openModal('location');
+            }}
+            activeOpacity={0.7}>
+            <View style={styles.filterIcon}>
+              <View style={styles.filterLine} />
+              <View style={styles.filterLine} />
+              <View style={styles.filterLine} />
             </View>
-            <View style={styles.gap} />
-            <View style={styles.halfInput}>
-              <IconInput
-                placeholder="退房日期"
-                iconName="calendar-outline"
-                value={
-                  dateRange?.end ? formatDateWithWeekday(dateRange.end) : ''
-                }
-                onPress={() => openModal('date')}
-              />
-            </View>
-          </View>
-          <IconInput
-            placeholder="對象動物"
-            iconName="paw-outline"
-            onPress={() => openModal('animal')}
-            value={condition.animals.join(', ')}
-          />
-          <TouchableOpacity
-            style={styles.searchButton}
-            onPress={handleSearch}
-            disabled={loading}>
-            {loading ? (
-              <ActivityIndicator color="#fff" />
-            ) : (
-              <Text style={styles.searchText}>搜尋</Text>
-            )}
           </TouchableOpacity>
+          </View>
         </View>
-      </PlatformImageBackground>
+      </SafeAreaView>
 
       {activeModal === 'location' && <LocationModal />}
       {activeModal === 'date' && <DateModal />}
@@ -167,44 +161,66 @@ const HomeScreen: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: '#f5f5f5',
   },
-  row: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 12,
+  safeAreaContainer: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    justifyContent: 'flex-start',
+    paddingTop: 180, // 讓搜索卡片出現在輪播圖的下半部
+    zIndex: 10,
   },
-  halfInput: {
-    flex: 1,
-  },
-  gap: {
-    width: 12,
-  },
-  card: {
-    width: '96%',
+  searchCard: {
+    marginHorizontal: 16,
     backgroundColor: '#fff',
-    borderRadius: 8,
-    padding: 12,
-    elevation: 5,
+    borderRadius: 16,
+    padding: 16,
+    elevation: 8,
     shadowColor: '#000',
-    shadowOpacity: 0.1,
-    shadowOffset: {width: 0, height: 2},
-    shadowRadius: 4,
-    transform: [{translateY: 80}],
-    borderColor: '#B3B3B3',
-    borderWidth: 4,
+    shadowOpacity: 0.15,
+    shadowOffset: {width: 0, height: 4},
+    shadowRadius: 8,
   },
-  searchButton: {
-    backgroundColor: '#1c1c1c',
-    borderRadius: 8,
-    paddingVertical: 12,
-    marginTop: 16,
+  searchHeader: {
+    flexDirection: 'row',
     alignItems: 'center',
   },
-  searchText: {
-    color: '#fff',
+  searchInput: {
+    flex: 1,
+    backgroundColor: '#f8f8f8',
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    marginRight: 12,
+  },
+  searchInputContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  searchPlaceholder: {
     fontSize: 16,
-    fontWeight: 'bold',
+    color: '#666',
+  },
+  filterButton: {
+    width: 48,
+    height: 48,
+    backgroundColor: '#333',
+    borderRadius: 12,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  filterIcon: {
+    width: 18,
+    height: 12,
+  },
+  filterLine: {
+    height: 2,
+    backgroundColor: '#fff',
+    marginVertical: 1,
+    borderRadius: 1,
   },
 });
 

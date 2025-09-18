@@ -43,6 +43,8 @@ const styles = StyleSheet.create({
     right: 0,
     bottom: 0,
     flex: 1,
+    zIndex: 999, // 確保 Modal 在最上層
+    elevation: 999, // Android 需要
   },
 });
 
